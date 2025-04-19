@@ -1,0 +1,5 @@
+{
+  "title": "Animated SVG Logo Reveal",
+  "description": "Create a single HTML page. Design a simple geometric SVG logo (e.g., interlocking shapes or letters). Use CSS animations (@keyframes) to animate the logo's strokes or fill properties on page load, making it appear to draw itself or fade/scale into view over 3 seconds. No JavaScript interaction is required.",
+  "block_id": "block_76f3b0"
+}

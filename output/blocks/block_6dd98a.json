@@ -1,0 +1,5 @@
+{
+  "title": "Simple Pong Game",
+  "description": "Create a single HTML page implementing the classic Pong game using a canvas. Include two vertical paddles, one controlled by the player using W/S keys, the other controlled by a simple AI that tries to follow the ball's Y position. Implement ball bouncing off paddles and top/bottom walls. Display scores for Player 1 and AI above the canvas. Reset the ball when a player scores.",
+  "block_id": "block_6dd98a"
+}

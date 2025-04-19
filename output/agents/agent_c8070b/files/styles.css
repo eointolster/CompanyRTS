@@ -1,0 +1,280 @@
+/* 
+* Rotation Balls - Main Stylesheet
+* A responsive design for a physics-based animation with rotating square and gravity balls 
+*/
+
+/* ---------- Base / Reset Styles ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #121212;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    line-height: 1.6;
+}
+
+/* ---------- Canvas Styles ---------- */
+canvas {
+    background-color: #000;
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+    max-width: 100%;
+    transition: border-color 0.3s;
+}
+
+canvas:hover {
+    border-color: #4CAF50;
+}
+
+/* ---------- Control Panel Styles ---------- */
+.controls {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    max-width: 800px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.control-group {
+    background-color: #222;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 200px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    max-width: 250px;
+}
+
+.control-group:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.control-group h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #4CAF50;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+}
+
+/* ---------- Form Control Styles ---------- */
+label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+input[type="range"] {
+    width: 120px;
+    height: 6px;
+    background-color: #333;
+    outline: none;
+    border-radius: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #45a049;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: #45a049;
+}
+
+input[type="number"] {
+    width: 60px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input[type="number"]:focus {
+    border-color: #4CAF50;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.9rem;
+    margin: 8px 0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s, transform 0.2s;
+    outline: none;
+    font-weight: 500;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+/* ---------- Color Picker Styles ---------- */
+.color-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+input[type="color"] {
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+/* ---------- Responsive Design ---------- */
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .control-group {
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    canvas {
+        width: 95%;
+        max-height: 50vh;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .control-group {
+        padding: 10px;
+    }
+    
+    h3 {
+        font-size: 1rem;
+    }
+    
+    label {
+        font-size: 0.8rem;
+    }
+    
+    input[type="range"] {
+        width: 100px;
+    }
+    
+    input[type="number"] {
+        width: 50px;
+        padding: 3px 5px;
+    }
+    
+    button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ---------- Dark Mode Enhancement ---------- */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0a0a0a;
+    }
+    
+    .control-group {
+        background-color: #1a1a1a;
+    }
+    
+    input[type="number"],
+    input[type="range"] {
+        background-color: #2a2a2a;
+    }
+}
+
+/* ---------- Animation Effects ---------- */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+}
+
+canvas:focus {
+    animation: pulseGlow 2s infinite;
+}

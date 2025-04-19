@@ -1,0 +1,5 @@
+{
+  "title": "Generative Art",
+  "description": "Generate an HTML page that uses primarily CSS (potentially with minimal JS for randomization or interaction) to create a piece of generative art. This could involve complex layouts using CSS Grid/Flexbox, pseudo-elements (::before, ::after), intricate box-shadow patterns, CSS custom properties (variables), clip-path, gradients, and potentially CSS animations (@keyframes) to make it dynamic. For example, a field of pulsating geometric shapes or a complex animated pattern.",
+  "block_id": "block_75e9e0"
+}

@@ -1,0 +1,23 @@
+{
+  "agent_id": "agent_f23c56",
+  "name": "Qa_3c56",
+  "state": "idle",
+  "x": 664.2911376953125,
+  "y": 91.28985595703125,
+  "llm_config": {
+    "type": "openai",
+    "model": null
+  },
+  "agent_type": "qa",
+  "assigned_developer_id": null,
+  "source_block_title": null,
+  "output_zip_path": "output\\final_zips\\qa_agent_f23c56_dev_agent_c8070b_20250417_233624.zip",
+  "corrections_made": true,
+  "corrected_files": [
+    "app.js",
+    "ball.js",
+    "physics.js",
+    "README.md",
+    "utils.js"
+  ]
+}

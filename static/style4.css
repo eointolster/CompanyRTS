@@ -1,0 +1,879 @@
+/* ================= Magical Foundations ================= */
+:root {
+    /* Core Colors */
+    --parchment: #f8f0e0;
+    --deep-forest: #1a2c17;
+    --forest-shadow: #0d1a0c;
+    --ancient-gold: #c9a959;
+    --elven-silver: #d7e1ec;
+    --mystic-blue: #2c5784;
+    --ember-red: #8a3324;
+    --enchanted-green: #356b4d;
+    --shadow-black: rgba(0, 0, 0, 0.7);
+    
+    /* Text Colors */
+    --text-light: #f0e6d2;
+    --text-dark: #483c32;
+    --text-gold: #c9a959;
+    
+    /* Magical Effects */
+    --magic-glow: 0 0 15px rgba(201, 169, 89, 0.5);
+    --ancient-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* ================= Core Enchantments ================= */
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Crimson+Pro:wght@400;500;600&display=swap');
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Crimson Pro', serif;
+    margin: 0;
+    color: var(--text-light);
+    line-height: 1.5;
+    background-color: var(--deep-forest);
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.03)' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 30% 40%, rgba(44, 87, 132, 0.2), transparent 70%),
+      radial-gradient(circle at 70% 60%, rgba(53, 107, 77, 0.15), transparent 70%),
+      linear-gradient(to bottom, var(--deep-forest), var(--forest-shadow));
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Magical mist effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3CradialGradient id='a' cx='0' cy='800' r='800' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23ffffff' stop-opacity='.05'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='1200' height='800'/%3E%3C/svg%3E")
+      center center/cover no-repeat fixed;
+    z-index: -1;
+    opacity: 0.4;
+    animation: mistFloat 120s linear infinite alternate;
+  }
+  
+  /* Floating particles effect */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 80% 10%, rgba(201, 169, 89, 0.05) 0%, transparent 20%),
+      radial-gradient(circle at 20% 30%, rgba(215, 225, 236, 0.03) 0%, transparent 20%),
+      radial-gradient(circle at 50% 70%, rgba(201, 169, 89, 0.04) 0%, transparent 30%);
+    background-size: 100% 100%;
+    z-index: -1;
+    opacity: 0.6;
+    animation: particleGlow 8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes mistFloat {
+    0% { transform: translateX(-5%) translateY(-2%); }
+    100% { transform: translateX(5%) translateY(2%); }
+  }
+  
+  @keyframes particleGlow {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { opacity: 0.3; }
+  }
+  
+  h1 {
+    margin: 18px 0 24px 26px;
+    font-family: 'Cinzel', serif;
+    color: var(--ancient-gold);
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  
+  h1::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 4px;
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--ancient-gold), transparent);
+    box-shadow: 0 0 8px var(--ancient-gold);
+  }
+  
+  /* ================= Realm Layout ================= */
+  #container-main {
+    display: flex;
+    margin: 0 auto;
+    max-width: 1600px;
+    height: calc(100vh - 100px);
+    perspective: 1000px;
+  }
+  
+  #main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px 0 0 12px;
+    background: rgba(26, 44, 23, 0.5);
+    backdrop-filter: blur(3px);
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(201, 169, 89, 0.1);
+    transform-style: preserve-3d;
+    transform: rotateX(1deg) translateZ(0);
+  }
+  
+  /* 3D depth effect for main area */
+  #main-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(to bottom, 
+        rgba(0, 0, 0, 0.4) 0%, 
+        rgba(0, 0, 0, 0) 10%,
+        rgba(0, 0, 0, 0) 90%,
+        rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  #panel {
+    width: 380px;
+    background: linear-gradient(135deg, rgba(30, 50, 30, 0.9), rgba(20, 35, 20, 0.9));
+    border-left: 1px solid rgba(201, 169, 89, 0.3);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 20px;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+  }
+  
+  /* Subtle rune pattern overlay */
+  #panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23c9a959' fill-opacity='0.05' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/svg%3E");
+    opacity: 0.3;
+    z-index: -1;
+  }
+  
+  #panel h3 {
+    font-family: 'Cinzel', serif;
+    margin: 0 0 20px 0;
+    color: var(--ancient-gold);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    position: relative;
+    padding-left: 16px;
+  }
+  
+  #panel h3::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--ancient-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--ancient-gold);
+  }
+  
+  .ground {
+    height: 70px;
+    width: 100%;
+    background: linear-gradient(to bottom, 
+      rgba(30, 50, 30, 0.7), 
+      rgba(20, 30, 20, 0.9));
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid rgba(201, 169, 89, 0.3);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .ground::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      repeating-linear-gradient(45deg, 
+        transparent, 
+        transparent 20px, 
+        rgba(201, 169, 89, 0.04) 20px, 
+        rgba(201, 169, 89, 0.04) 40px);
+    opacity: 0.5;
+  }
+  
+  /* ================= Mystical Grid (Block Palette) ================= */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(10, 20, 10, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(201, 169, 89, 0.2);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(10, 20, 10, 0.6);
+    border: 1px solid rgba(201, 169, 89, 0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cell.drag-over {
+    background: rgba(201, 169, 89, 0.1);
+    border-color: var(--ancient-gold);
+    box-shadow: inset 0 0 15px rgba(201, 169, 89, 0.1), 0 0 10px rgba(201, 169, 89, 0.2);
+  }
+  
+  /* ================= Artifacts (Blocks In Grid) ================= */
+  .block {
+    background: linear-gradient(135deg, rgba(138, 51, 36, 0.6), rgba(90, 30, 20, 0.8));
+    border: 1px solid rgba(201, 169, 89, 0.3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: grab;
+    text-align: center;
+    width: 100%;
+    min-height: 28px;
+    line-height: 1.4;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201, 169, 89, 0.5), transparent);
+  }
+  
+  .block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 15px rgba(201, 169, 89, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    border-color: rgba(201, 169, 89, 0.5);
+  }
+  
+  .block.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    transform: scale(0.95);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* ================= Markers (On Main Area) ================= */
+  .block-marker {
+    position: relative;
+    background: linear-gradient(135deg, rgba(138, 51, 36, 0.6), rgba(90, 30, 20, 0.8));
+    border: 1px solid rgba(201, 169, 89, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+    z-index: 10;
+    color: var(--text-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(201, 169, 89, 0.1);
+    font-weight: 500;
+  }
+  
+  .block-marker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201, 169, 89, 0.5), transparent);
+  }
+  
+  .block-marker:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 15px rgba(201, 169, 89, 0.2);
+  }
+  
+  /* ================= Agents (On Main Area) ================= */
+  .agent-container {
+    width: 56px;
+    height: 56px;
+    pointer-events: auto;
+    z-index: 20;
+    position: absolute;
+    transition: top 2.5s ease-in-out, left 2s ease-in-out;
+  }
+  
+  .agent {
+    width: 56px;
+    height: 56px;
+    background: radial-gradient(circle at 35% 35%, rgba(53, 107, 77, 0.9), rgba(26, 44, 23, 0.8));
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(53, 107, 77, 0.7), 0 5px 15px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--text-gold);
+    line-height: 56px;
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    font-family: 'Cinzel', serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(201, 169, 89, 0.4);
+  }
+  
+  /* Inner glow */
+  .agent::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 169, 89, 0.3);
+    box-shadow: inset 0 0 15px rgba(201, 169, 89, 0.2);
+    animation: innerglow 4s ease-in-out infinite alternate;
+  }
+  
+  /* Outer magical ring */
+  .agent::after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 169, 89, 0.15);
+    box-shadow: 0 0 15px rgba(53, 107, 77, 0.3);
+    animation: rotate 20s linear infinite, pulse 4s infinite alternate;
+    background-image: 
+      repeating-conic-gradient(
+        rgba(201, 169, 89, 0) 0deg, 
+        rgba(201, 169, 89, 0) 20deg, 
+        rgba(201, 169, 89, 0.1) 25deg, 
+        rgba(201, 169, 89, 0) 30deg);
+    opacity: 0.7;
+  }
+  
+  @keyframes innerglow {
+    0% { opacity: 0.4; box-shadow: inset 0 0 10px rgba(201, 169, 89, 0.1); }
+    100% { opacity: 1; box-shadow: inset 0 0 20px rgba(201, 169, 89, 0.3); }
+  }
+  
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.5; transform: scale(0.95); }
+    100% { opacity: 0.7; transform: scale(1.05); }
+  }
+  
+  .agent.qa-agent {
+    background: radial-gradient(circle at 35% 35%, rgba(44, 87, 132, 0.9), rgba(20, 40, 70, 0.8));
+    box-shadow: 0 0 20px rgba(44, 87, 132, 0.7), 0 5px 15px rgba(0, 0, 0, 0.4);
+  }
+  
+  .agent.qa-agent::after {
+    box-shadow: 0 0 15px rgba(44, 87, 132, 0.3);
+  }
+  
+  .agent.selected {
+    border: 2px solid var(--ancient-gold);
+    box-shadow: 0 0 30px rgba(201, 169, 89, 0.7), 0 5px 15px rgba(0, 0, 0, 0.4);
+    z-index: 21;
+  }
+  
+  .agent.qa-agent.selected {
+    box-shadow: 0 0 30px rgba(201, 169, 89, 0.7), 0 5px 15px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* ================= Delete Buttons ================= */
+  .delete-button {
+    position: absolute;
+    background: rgba(138, 51, 36, 0.9);
+    color: var(--text-light);
+    border: 1px solid rgba(201, 169, 89, 0.4);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    z-index: 30;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s ease;
+  }
+  
+  .delete-button:hover {
+    background: rgba(138, 51, 36, 1);
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(138, 51, 36, 0.6);
+  }
+  
+  .delete-grid-block-button {
+    top: -6px;
+    right: -6px;
+  }
+  
+  .block:hover .delete-grid-block-button {
+    display: block;
+  }
+  
+  .delete-marker-button {
+    top: -6px;
+    right: -6px;
+    z-index: 11;
+  }
+  
+  .block-marker:hover .delete-marker-button {
+    display: block;
+  }
+  
+  .delete-agent-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(138, 51, 36, 0.9);
+    color: var(--text-light);
+    border: 1px solid rgba(201, 169, 89, 0.4);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 25;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  
+  .delete-agent-btn:hover {
+    background: rgba(138, 51, 36, 1);
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(138, 51, 36, 0.6);
+  }
+  
+  /* ================= Magical Scrolls (Modals) ================= */
+  .modal-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 88;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+  }
+  
+  .modal-box {
+    background: var(--parchment);
+    border-radius: 6px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6), 0 0 30px rgba(201, 169, 89, 0.2);
+    padding: 30px;
+    min-width: 340px;
+    max-width: 500px;
+    color: var(--text-dark);
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(2deg);
+    border: 1px solid rgba(201, 169, 89, 0.4);
+  }
+  
+  /* Parchment texture */
+  .modal-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(72, 60, 50, 0.03)' fill-rule='evenodd'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(72, 60, 50, 0.01) 2px, rgba(72, 60, 50, 0.01) 4px);
+    border-radius: 6px;
+    z-index: -1;
+  }
+  
+  .modal-box h3 {
+    margin-top: 0;
+    color: var(--mystic-blue);
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-bottom: 12px;
+  }
+  
+  .modal-box h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--mystic-blue), transparent);
+  }
+  
+  /* Form Elements in Modal */
+  #spawn-agent-modal-bg select,
+  #spawn-agent-modal-bg input[type="text"],
+  textarea {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(72, 60, 50, 0.2);
+    border-radius: 4px;
+    color: var(--text-dark);
+    padding: 10px 12px;
+    margin-top: 6px;
+    width: 95%;
+    font-size: 15px;
+    font-family: 'Crimson Pro', serif;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  #spawn-agent-modal-bg select:focus,
+  #spawn-agent-modal-bg input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--mystic-blue);
+    box-shadow: 0 0 0 2px rgba(44, 87, 132, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  #spawn-agent-modal-bg label {
+    color: var(--text-dark);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+    font-family: 'Crimson Pro', serif;
+  }
+  
+  input[type="checkbox"] {
+    accent-color: var(--mystic-blue);
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* ================= Enchanted Buttons ================= */
+  button {
+    background: linear-gradient(135deg, rgba(201, 169, 89, 0.8), rgba(161, 129, 49, 0.9));
+    color: var(--text-dark);
+    border: 1px solid rgba(201, 169, 89, 0.6);
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    font-family: 'Crimson Pro', serif;
+  }
+  
+  button:hover {
+    background: linear-gradient(135deg, rgba(211, 179, 99, 0.9), rgba(171, 139, 59, 1));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), 0 0 15px rgba(201, 169, 89, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* ================= Chronicles (Log) ================= */
+  #log {
+    max-height: 180px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: var(--text-light);
+    background: rgba(10, 20, 10, 0.6);
+    border: 1px solid rgba(201, 169, 89, 0.2);
+    border-radius: 6px;
+    padding: 14px;
+    line-height: 1.5;
+    margin-top: 20px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+    font-family: 'Crimson Pro', serif;
+  }
+  
+  #log div {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(201, 169, 89, 0.1);
+  }
+  
+  #log div:last-child {
+    border-bottom: none;
+  }
+  
+  /* Custom scrollbar for log */
+  #log::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #log::-webkit-scrollbar-track {
+    background: rgba(10, 20, 10, 0.4);
+    border-radius: 4px;
+  }
+  
+  #log::-webkit-scrollbar-thumb {
+    background: rgba(201, 169, 89, 0.2);
+    border-radius: 4px;
+  }
+  
+  #log::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 169, 89, 0.3);
+  }
+  
+  /* ================= Magical Zones ================= */
+  .finish-zone {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(53, 107, 77, 0.1);
+    border: 2px solid rgba(53, 107, 77, 0.5);
+    border-radius: 6px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-light);
+    font-weight: 600;
+    box-sizing: border-box;
+    font-family: 'Crimson Pro', serif;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 20px rgba(53, 107, 77, 0.2);
+  }
+  
+  .finish-zone::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 1px dashed rgba(53, 107, 77, 0.4);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  
+  .dropoff-zone {
+    background: rgba(44, 87, 132, 0.1);
+    border: 2px solid rgba(44, 87, 132, 0.5);
+    box-shadow: 0 0 20px rgba(44, 87, 132, 0.2);
+  }
+  
+  .dropoff-zone::before {
+    border-color: rgba(44, 87, 132, 0.4);
+  }
+  
+  .finish-zone.dragging,
+  .dropoff-zone.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    box-shadow: var(--magic-glow);
+    z-index: 1000;
+  }
+  
+  /* ================= Agent Progress Indicator ================= */
+  .agent-progress {
+    position: absolute;
+    bottom: -12px;
+    left: 10%;
+    width: 80%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .agent-progress::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--ancient-gold);
+    border-radius: 2px;
+    animation: agentWorkingAnimation 5s linear infinite;
+    box-shadow: 0 0 10px rgba(201, 169, 89, 0.5);
+  }
+  
+  @keyframes agentWorkingAnimation {
+    0% { width: 0%; }
+    95% { width: 100%; }
+    100% { width: 100%; }
+  }
+  
+  /* ================= Responsive Enchantments ================= */
+  @media (max-width: 768px) {
+    #container-main {
+      flex-direction: column;
+      height: auto;
+    }
+  
+    #panel {
+      width: 100%;
+      border-radius: 0 0 12px 12px;
+      border-left: none;
+      border-top: 1px solid rgba(201, 169, 89, 0.3);
+    }
+  
+    #main-area {
+      min-height: 60vh;
+      border-radius: 12px 12px 0 0;
+    }
+  
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+
+  /* Add near other layout styles */
+#panel {
+    /* Your existing styles: min-width, background, border, etc. */
+    min-width: 340px; /* Default width */
+    max-width: 400px;
+    position: relative; /* Needed for absolute positioning of the button */
+    transition: min-width 0.3s ease-in-out, max-width 0.3s ease-in-out, padding 0.3s ease-in-out; /* Smooth transition */
+    overflow: hidden; /* Hide content when minimized */
+    /* Add flex properties if needed for content alignment */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #toggle-panel-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px; /* Position inside the panel */
+    z-index: 100; /* Ensure it's above other panel content */
+    padding: 2px 6px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    /* Add styling matching your theme (e.g., neumorphic/glassmorphic) */
+    background: var(--panel-bg, #eee); /* Use theme variable or fallback */
+    color: var(--neon-accent, #333);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    box-shadow: 2px 2px 4px var(--neumorphic-shadow-dark, rgba(0,0,0,0.2)),
+               -2px -2px 4px var(--neumorphic-shadow-light, rgba(255,255,255,0.1));
+  }
+  #toggle-panel-btn:hover {
+      color: var(--text-color, #000);
+      box-shadow: inset 1px 1px 2px var(--neumorphic-shadow-dark, rgba(0,0,0,0.3)),
+                  inset -1px -1px 2px var(--neumorphic-shadow-light, rgba(255,255,255,0.2)),
+                  0 0 5px var(--neon-accent, #00e5ff); /* Optional glow */
+  }
+  
+  
+  /* Minimized State for the Panel */
+  #panel.minimized {
+    min-width: 40px; /* Width when collapsed */
+    max-width: 40px;
+    padding-left: 0; /* Remove padding */
+    padding-right: 0;
+  }
+  
+  /* Hide panel content when minimized, except the button */
+  #panel.minimized > *:not(#toggle-panel-btn) {
+    display: none; /* Hide all direct children except the button */
+    /* Alternative: use visibility: hidden; opacity: 0; if display:none causes issues */
+  }
+  
+  /* Change button text/icon when panel is minimized */
+  #panel.minimized #toggle-panel-btn::before {
+     content: "»"; /* Change symbol to expand */
+  }
+  #panel:not(.minimized) #toggle-panel-btn::before {
+     content: "«"; /* Default symbol to collapse */
+  }
+  /* Hide original button text if using ::before for icon */
+   #toggle-panel-btn {
+     font-size: 0; /* Hide original text if using pseudo-element */
+   }
+   #toggle-panel-btn::before {
+      font-size: 16px; /* Set size for the pseudo-element icon */
+   }
+  
+   /* Optional: Make main area expand - depends on #container-main being flex */
+   #container-main {
+      display: flex; /* Ensure container is flex */
+   }
+   #main-area {
+      flex: 1; /* Allow main area to grow */
+      transition: flex-grow 0.3s ease-in-out; /* Smooth transition if needed */
+   }

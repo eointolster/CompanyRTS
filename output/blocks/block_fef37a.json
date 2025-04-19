@@ -1,0 +1,5 @@
+{
+  "title": "RotationBalls",
+  "description": "Make a single webpage with a rotating square, with varying size balls inside. The balls respond to gravity. The effects are amazing but the code must use vanilla javascript and not be dependent on npm or any outside code libraries.",
+  "block_id": "block_fef37a"
+}

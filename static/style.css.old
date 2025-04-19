@@ -1,0 +1,410 @@
+/* ================= General Styles ================= */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: #e6fbe0;
+}
+
+h1 {
+    margin: 12px 0 0 20px;
+}
+
+/* ================= Layout ================= */
+#container-main {
+    display: flex;
+}
+
+#main-area {
+    flex: 1;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Aligns ground/agents to bottom */
+    align-items: center;
+    position: relative; /* Crucial for absolute positioning of children */
+    overflow: hidden;
+}
+
+#panel {
+    min-width: 340px;
+    max-width: 400px;
+    background: #f6fff5;
+    border-left: 3px solid #b7dbaf;
+    box-shadow: -4px 0 20px #abc5b377;
+    padding: 18px 12px;
+    margin-left: 0; /* Ensure no extra margin */
+}
+
+#panel h3 {
+    margin: 4px 0 10px 0;
+}
+
+.ground {
+    background: repeating-linear-gradient(to right, #6ab34e, #6ab34e 60px, #7dcd60 65px, #6ab34e 120px);
+    min-height: 60px;
+    width: 100%;
+    border-top: 5px solid #4e8c44;
+    /* z-index needed if elements go behind it */
+     z-index: 1;
+}
+
+/* ================= Grid (Block Palette) ================= */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cell {
+    width: 60px; /* Fixed width */
+    height: 60px; /* Fixed height */
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.cell.drag-over {
+    background-color: #d0f0d0;
+    border-color: #8bc34a;
+    border-style: dashed;
+}
+
+/* ================= Blocks (In Grid) ================= */
+.block {
+    background: #fff7e2;
+    border: 1px solid #ffe0b2;
+    border-radius: 5px;
+    padding: 2px 4px;
+    font-size: 12px;
+    cursor: grab;
+    text-align: center;
+    width: 100%; /* Take full cell width */
+    min-height: 18px;
+    line-height: 14px;
+    position: relative; /* Needed for the delete button */
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.block.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+/* ================= Markers (On Main Area) ================= */
+#markers-on-ground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* Cover the main area */
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 10; /* Above ground */
+}
+
+.block-marker {
+    /* JS sets position:absolute, left, top */
+    position: relative; /* Add relative positioning for the delete button */
+    background-color: #fffa9e;
+    border: 1px solid #ffcc80;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 11px;
+    cursor: default;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto; /* Markers themselves are clickable */
+    z-index: 10; /* Ensure they are above ground */
+}
+
+/* ================= Agents (On Main Area) ================= */
+#agents-on-ground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow clicks to pass through */
+    z-index: 15; /* Above markers */
+}
+
+.agent-container {
+    /* JS sets position:absolute, left, top */
+    width: 44px; /* Match agent size */
+    height: 44px; /* Match agent size */
+    pointer-events: auto; /* Container is clickable (for agent/button) */
+    z-index: 20; /* Above markers */
+    position: absolute; /* Ensure this is set for JS positioning */
+
+    /* Animation */
+    transition: top 3s ease-in-out, left 2s ease-in-out;
+}
+
+.agent {
+    /* Visual appearance */
+    width: 44px;
+    height: 44px;
+    background: radial-gradient(circle at 50% 40%, #ff9090, #aa5252 90%);
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    box-shadow: 0 3px 10px #899860;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    line-height: 44px; /* Vertically center text */
+    display: block; /* Fill container */
+    box-sizing: border-box;
+    position: relative; /* Context for delete button */
+    pointer-events: auto; /* Agent visual itself is clickable */
+    z-index: 20; /* Above markers */
+    /* Removed top offset, margin, vertical-align as container handles position */
+}
+
+
+.agent.qa-agent {
+    /* Visual appearance */
+    width: 44px;
+    height: 44px;
+    background: radial-gradient(circle at 50% 40%, #9090ff, #5252aa 90%); /* Blue gradient */
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    box-shadow: 0 3px 10px #899860;
+    text-align: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    line-height: 44px; /* Vertically center text */
+    display: block; /* Fill container */
+    box-sizing: border-box;
+    position: relative; /* Context for delete button */
+    pointer-events: auto; /* Agent visual itself is clickable */
+    z-index: 20; /* Above markers */
+    /* Removed top offset, margin, vertical-align as container handles position */
+}
+
+.agent.selected {
+    outline: 3px solid #007bff;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.7);
+    z-index: 21; /* Ensure selected is visually prominent */
+}
+
+/* ================= Delete Buttons ================= */
+/* Generic style, hidden by default */
+.delete-button {
+    position: absolute;
+    background-color: rgba(255, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 15px; /* Adjust for vertical centering */
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    z-index: 30; /* High z-index */
+    display: none; /* Hidden by default */
+}
+
+.delete-button:hover {
+    background-color: rgba(255, 0, 0, 0.9);
+}
+
+/* Specific position for block delete button */
+.delete-grid-block-button {
+    top: -2px;
+    right: 1px;
+}
+
+/* Show on hover for blocks in grid */
+.block:hover .delete-grid-block-button {
+    display: block;
+}
+
+/* Specific position for marker delete button */
+.delete-marker-button {
+    top: -4px;
+    right: -2px;
+    z-index: 11; /* Above marker content */
+}
+
+/* Show on hover for markers */
+.block-marker:hover .delete-marker-button {
+    display: block;
+}
+
+/* Specific style & position for agent delete button */
+.delete-agent-btn {
+    position: absolute;
+    top: -8px; /* Relative to agent span */
+    right: -8px; /* Relative to agent span */
+    background-color: #ff4d4d;
+    color: white;
+    border: 1px solid #cc0000;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 18px; /* Center the 'X' */
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 25; /* Ensure button is on top of agent */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    display: block; /* Always visible for agents */
+}
+
+.delete-agent-btn:hover {
+    background-color: #cc0000;
+}
+
+/* ================= Modals ================= */
+.modal-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4); /* Slightly less opaque */
+    z-index: 88;
+    display: flex; /* Use flex for centering */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-box {
+    background: #f9ffe7;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    min-width: 340px;
+}
+
+/* Specific styles for spawn agent modal inputs */
+#spawn-agent-modal-bg select,
+#spawn-agent-modal-bg input[type="text"] {
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: 95%; /* Consistent width */
+}
+
+#spawn-agent-modal-bg label {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #333;
+    display: block; /* Ensure label is above input */
+    margin-bottom: 2px;
+}
+
+#spawn-agent-modal-bg p {
+    margin-bottom: 15px;
+}
+
+/* ================= Log ================= */
+#log {
+    max-height: 120px;
+    overflow-y: auto; /* Only vertical scroll */
+    font-size: 13px;
+    color: #444;
+    background: #eee; /* Slight background */
+    border: 1px solid #ddd;
+    padding: 5px;
+    margin-top: 15px;
+    line-height: 1.4;
+}
+
+#log div {
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+    border-bottom: 1px dashed #ccc;
+}
+#log div:last-child {
+    border-bottom: none;
+}
+
+/* ================= Drag/Drop States ================= */
+/* Style for main-area being dragged over (removed !important) */
+#main-area.drag-over {
+    background-color: #dff0df;
+    outline: 2px dashed #4e8c44;
+    outline-offset: -4px;
+}
+
+.finish-zone {
+    position: absolute;
+    width: 100px; /* Adjust size */
+    height: 100px; /* Adjust size */
+    background-color: rgba(200, 220, 255, 0.2); /* Light blue background */
+    border: 2px dashed rgba(100, 150, 255, 0.6);
+    border-radius: 5px;
+    z-index: 5; /* Below markers and agents */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: rgba(100, 150, 255, 0.9);
+    font-weight: bold;
+    box-sizing: border-box;
+}
+
+.dropoff-zone {
+    background-color: rgba(255, 224, 180, 0.2); /* Light orange background */
+    border: 2px solid rgba(255, 152, 0, 0.7); /* Solid orange border */
+    color: rgba(255, 152, 0, 1); /* Orange text */
+    /* Add any other distinct styling */
+}
+
+.finish-zone.dragging {
+    cursor: grabbing;
+    opacity: 0.7;
+    border-style: solid; /* Change border to solid while dragging */
+    z-index: 1000; /* Ensure dragged zone is on top */
+}
+
+/* ================= Agent Progress Indicator ================= */
+.agent-progress {
+    position: absolute;
+    bottom: -12px; /* Position below agent */
+    left: 10%; /* Indent slightly */
+    width: 80%;
+    height: 6px;
+    background-color: #e0e0e0; /* Light grey background */
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.agent-progress::after { /* The moving bar */
+    content: '';
+    display: block;
+    width: 0; /* Starts at 0 width */
+    height: 100%;
+    background-color: #66bb6a; /* Green progress */
+    border-radius: 3px;
+    /* Use animation to simulate progress */
+    animation: agentWorkingAnimation 5s linear infinite; /* Match backend sleep time */
+}
+
+/* Define the animation */
+@keyframes agentWorkingAnimation {
+    0% { width: 0%; background-color: #a5d6a7; } /* Lighter green start */
+    95% { width: 100%; background-color: #66bb6a; } /* Darker green end */
+    100% { width: 100%; } /* Hold at end briefly */
+}

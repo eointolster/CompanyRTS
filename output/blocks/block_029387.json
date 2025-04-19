@@ -1,0 +1,5 @@
+{
+  "title": "Interactive Bar Chart",
+  "description": "Create a single HTML page displaying a vertical bar chart based on static data defined within the JavaScript (e.g., const data = [{label: 'Jan', value: 50}, {label: 'Feb', value: 80}, ...];). Use HTML divs or SVG rectangles for the bars, styled with CSS. Implement hover effects where hovering over a bar displays its exact value in a tooltip and slightly highlights the bar. Use CSS transitions for smooth highlighting.",
+  "block_id": "block_029387"
+}

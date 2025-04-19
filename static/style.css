@@ -1,0 +1,670 @@
+/* ================= Base Variables ================= */
+:root {
+    /* Primary Colors */
+    --blue: #1565c0;
+    --red: #e53935;
+    --yellow: #fdd835;
+    --green: #2e7d32;
+    --purple: #8e24aa;
+    
+    /* Background Colors */
+    --bg-white: #ffffff;
+    --bg-light: #f7f9fc;
+    --bg-blue-light: #e3f2fd;
+    
+    /* Text Colors */
+    --text-dark: #2c3e50;
+    --text-light: #ffffff;
+    --text-muted: #7f8c8d;
+    
+    /* Borders & Shadows */
+    --border-radius: 12px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  
+  /* ================= Core Styles ================= */
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+  
+  h1 {
+    margin: 20px 0 24px 24px;
+    color: var(--blue);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  
+  /* ================= Layout ================= */
+  #container-main {
+    display: flex;
+    height: calc(100vh - 80px);
+    margin: 0 20px 20px;
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  
+  #main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-blue-light);
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+  
+  #panel {
+    width: 380px;
+    background: var(--blue);
+    padding: 24px 20px;
+    color: var(--text-light);
+  }
+  
+  #panel h3 {
+    margin: 0 0 20px 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-bottom: 10px;
+  }
+  
+  #panel h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 4px;
+    background: var(--yellow);
+    border-radius: 2px;
+  }
+  
+  .ground {
+    height: 80px;
+    width: 100%;
+    background: var(--yellow);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .ground::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20px 20px, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 5px, transparent 5px),
+      radial-gradient(circle at 60px 60px, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 5px, transparent 5px),
+      radial-gradient(circle at 100px 20px, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 5px, transparent 5px);
+    background-size: 100px 100px;
+    opacity: 0.8;
+  }
+  
+  /* ================= Grid (Block Palette) ================= */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--border-radius);
+  }
+  
+  .cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+  
+  .cell.drag-over {
+    background: rgba(255,255,255,0.15);
+    box-shadow: inset 0 0 0 2px var(--yellow);
+  }
+  
+  /* ================= Blocks (In Grid) ================= */
+  .block {
+    background: var(--red);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: grab;
+    text-align: center;
+    width: 100%;
+    min-height: 28px;
+    line-height: 1.4;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-light);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
+  
+  .block:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .block.dragging {
+    opacity: 0.8;
+    cursor: grabbing;
+    transform: scale(0.97);
+  }
+  
+  /* ================= Markers (On Main Area) ================= */
+  .block-marker {
+    position: relative;
+    background: var(--red);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+    z-index: 10;
+    color: var(--text-light);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .block-marker:hover {
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* ================= Agents (On Main Area) ================= */
+  .agent-container {
+    width: 54px;
+    height: 54px;
+    pointer-events: auto;
+    z-index: 20;
+    position: absolute;
+    transition: top 2.5s ease-in-out, left 2s ease-in-out;
+  }
+  
+  .agent {
+    width: 54px;
+    height: 54px;
+    background: radial-gradient(circle at 35% 35%, #42a5f5, var(--blue));
+    border-radius: 50%;
+    box-shadow: var(--shadow-md), 0 0 15px rgba(21, 101, 192, 0.6);
+    text-align: center;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--text-light);
+    line-height: 54px;
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  .agent::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    animation: rotate 8s linear infinite;
+  }
+  
+  .agent::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(21, 101, 192, 0.25);
+    animation: pulse 3s infinite alternate;
+  }
+  
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.4; }
+    100% { transform: scale(1.05); opacity: 1; }
+  }
+  
+  .agent.qa-agent {
+    background: radial-gradient(circle at 35% 35%, #ba68c8, var(--purple));
+    box-shadow: var(--shadow-md), 0 0 15px rgba(142, 36, 170, 0.6);
+  }
+  
+  .agent.qa-agent::after {
+    border-color: rgba(142, 36, 170, 0.25);
+  }
+  
+  .agent.selected {
+    box-shadow: 0 0 0 3px var(--yellow), var(--shadow-md), 0 0 20px rgba(21, 101, 192, 0.7);
+    transform: scale(1.05);
+    z-index: 21;
+  }
+  
+  .agent.qa-agent.selected {
+    box-shadow: 0 0 0 3px var(--yellow), var(--shadow-md), 0 0 20px rgba(142, 36, 170, 0.7);
+  }
+  
+  /* ================= Delete Buttons ================= */
+  .delete-button {
+    position: absolute;
+    background: var(--red);
+    color: var(--text-light);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    z-index: 30;
+    display: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
+  
+  .delete-button:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .delete-grid-block-button {
+    top: -8px;
+    right: -8px;
+  }
+  
+  .block:hover .delete-grid-block-button {
+    display: block;
+  }
+  
+  .delete-marker-button {
+    top: -8px;
+    right: -8px;
+    z-index: 11;
+  }
+  
+  .block-marker:hover .delete-marker-button {
+    display: block;
+  }
+  
+  .delete-agent-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--red);
+    color: var(--text-light);
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 25;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+  }
+  
+  .delete-agent-btn:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* ================= Modals ================= */
+  .modal-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 88;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal-box {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 28px;
+    min-width: 340px;
+    max-width: 500px;
+    color: var(--text-dark);
+  }
+  
+  .modal-box h3 {
+    margin-top: 0;
+    color: var(--blue);
+    font-size: 22px;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+  }
+  
+  .modal-box h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--blue);
+    border-radius: 1.5px;
+  }
+  
+  /* Form Elements in Modal */
+  #spawn-agent-modal-bg select,
+  #spawn-agent-modal-bg input[type="text"],
+  textarea {
+    background: var(--bg-light);
+    border: 1px solid #dbe1e8;
+    border-radius: 8px;
+    color: var(--text-dark);
+    padding: 12px 14px;
+    margin-top: 6px;
+    width: 95%;
+    font-size: 15px;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.2s ease;
+  }
+  
+  #spawn-agent-modal-bg select:focus,
+  #spawn-agent-modal-bg input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+  }
+  
+  #spawn-agent-modal-bg label {
+    color: var(--text-dark);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  input[type="checkbox"] {
+    accent-color: var(--blue);
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* ================= Buttons ================= */
+  button {
+    background: var(--yellow);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  button:hover {
+    background: #ffeb3b;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  
+  button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* ================= Log ================= */
+  #log {
+    flex-grow: 1;
+    margin-top: 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: var(--text-light);
+    background: rgba(0,0,0,0.15);
+    border-radius: var(--border-radius);
+    padding: 14px;
+    line-height: 1.5;
+    height: 200px;
+  }
+  
+  #log div {
+    margin-bottom: 6px;
+    word-wrap: break-word;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  #log div:last-child {
+    border-bottom: none;
+  }
+  
+  /* Custom scrollbar for log */
+  #log::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #log::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+  }
+  
+  #log::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+  }
+  
+  #log::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+  }
+  
+  /* ================= Zones ================= */
+  .finish-zone {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: rgba(21, 101, 192, 0.1);
+    border: 3px solid var(--blue);
+    border-radius: var(--border-radius);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--blue);
+    font-weight: 700;
+    box-sizing: border-box;
+  }
+  
+  .dropoff-zone {
+    background: rgba(46, 125, 50, 0.1);
+    border: 3px solid var(--green);
+    color: var(--green);
+  }
+  
+  .finish-zone.dragging,
+  .dropoff-zone.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+  }
+  
+  /* ================= Agent Progress Indicator ================= */
+  .agent-progress {
+    position: absolute;
+    bottom: -10px;
+    left: 10%;
+    width: 80%;
+    height: 5px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 2.5px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  }
+  
+  .agent-progress::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--yellow);
+    border-radius: 2.5px;
+    animation: agentWorkingAnimation 5s linear infinite;
+  }
+  
+  .agent.qa-agent .agent-progress::after {
+    background: var(--yellow);
+  }
+  
+  @keyframes agentWorkingAnimation {
+    0% { width: 0%; }
+    95% { width: 100%; }
+    100% { width: 100%; }
+  }
+  
+  /* ================= Responsive Design ================= */
+  @media (max-width: 768px) {
+    #container-main {
+      flex-direction: column;
+      height: auto;
+    }
+  
+    #panel {
+      width: 100%;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+  
+    #main-area {
+      min-height: 60vh;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+  
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+    /* Add near other layout styles */
+#panel {
+    /* Your existing styles: min-width, background, border, etc. */
+    min-width: 340px; /* Default width */
+    max-width: 400px;
+    position: relative; /* Needed for absolute positioning of the button */
+    transition: min-width 0.3s ease-in-out, max-width 0.3s ease-in-out, padding 0.3s ease-in-out; /* Smooth transition */
+    overflow: hidden; /* Hide content when minimized */
+    /* Add flex properties if needed for content alignment */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #toggle-panel-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px; /* Position inside the panel */
+    z-index: 100; /* Ensure it's above other panel content */
+    padding: 2px 6px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    /* Add styling matching your theme (e.g., neumorphic/glassmorphic) */
+    background: var(--panel-bg, #eee); /* Use theme variable or fallback */
+    color: var(--neon-accent, #333);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    box-shadow: 2px 2px 4px var(--neumorphic-shadow-dark, rgba(0,0,0,0.2)),
+               -2px -2px 4px var(--neumorphic-shadow-light, rgba(255,255,255,0.1));
+  }
+  #toggle-panel-btn:hover {
+      color: var(--text-color, #000);
+      box-shadow: inset 1px 1px 2px var(--neumorphic-shadow-dark, rgba(0,0,0,0.3)),
+                  inset -1px -1px 2px var(--neumorphic-shadow-light, rgba(255,255,255,0.2)),
+                  0 0 5px var(--neon-accent, #00e5ff); /* Optional glow */
+  }
+  
+  
+  /* Minimized State for the Panel */
+  #panel.minimized {
+    min-width: 40px; /* Width when collapsed */
+    max-width: 40px;
+    padding-left: 0; /* Remove padding */
+    padding-right: 0;
+  }
+  
+  /* Hide panel content when minimized, except the button */
+  #panel.minimized > *:not(#toggle-panel-btn) {
+    display: none; /* Hide all direct children except the button */
+    /* Alternative: use visibility: hidden; opacity: 0; if display:none causes issues */
+  }
+  
+  /* Change button text/icon when panel is minimized */
+  #panel.minimized #toggle-panel-btn::before {
+     content: "»"; /* Change symbol to expand */
+  }
+  #panel:not(.minimized) #toggle-panel-btn::before {
+     content: "«"; /* Default symbol to collapse */
+  }
+  /* Hide original button text if using ::before for icon */
+   #toggle-panel-btn {
+     font-size: 0; /* Hide original text if using pseudo-element */
+   }
+   #toggle-panel-btn::before {
+      font-size: 16px; /* Set size for the pseudo-element icon */
+   }
+  
+   /* Optional: Make main area expand - depends on #container-main being flex */
+   #container-main {
+      display: flex; /* Ensure container is flex */
+   }
+   #main-area {
+      flex: 1; /* Allow main area to grow */
+      transition: flex-grow 0.3s ease-in-out; /* Smooth transition if needed */
+   }

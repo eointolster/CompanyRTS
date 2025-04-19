@@ -1,0 +1,15 @@
+{
+  "agent_id": "agent_c8070b",
+  "name": "Developer_070b",
+  "state": "idle",
+  "x": 396.0,
+  "y": 757.203125,
+  "llm_config": {
+    "type": "openai",
+    "model": null
+  },
+  "agent_type": "developer",
+  "assigned_block_id": null,
+  "source_block_title": null,
+  "completed_marker_id": null
+}

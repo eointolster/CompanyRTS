@@ -1,0 +1,951 @@
+/* ================= Variables & Foundations ================= */
+:root {
+    /* Core Color Palette */
+    --bg-primary: #0a0e17; /* Deep space blue-black */
+    --bg-secondary: #131b2b; /* Slightly lighter blue-black */
+    --panel-bg: rgba(18, 28, 51, 0.7); /* Semi-transparent panel background */
+    --glass-blur: 12px; /* Blur intensity for glassmorphism */
+    
+    /* Accent Colors */
+    --accent-primary: #00e5ff; /* Cyan - main accent */
+    --accent-secondary: #4d7cfe; /* Blue - secondary accent */
+    --accent-tertiary: #ff3d71; /* Red - for delete/warning */
+    --accent-qa: #bd57ff; /* Purple - for QA agents */
+    --accent-dev: #36f1cd; /* Teal - for dev agents */
+    
+    /* Text Colors */
+    --text-primary: #edf1f7; /* Light gray for most text */
+    --text-secondary: #a1b1ca; /* Muted blue-gray for less important text */
+    --text-muted: #636e87; /* Very muted text */
+    
+    /* Shadows */
+    --neu-shadow-dark: rgba(0, 0, 0, 0.4);
+    --neu-shadow-light: rgba(80, 120, 170, 0.05);
+    --glow-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    --pressed-shadow: inset 3px 3px 6px var(--neu-shadow-dark), 
+                      inset -2px -2px 5px var(--neu-shadow-light);
+    
+    /* Typography */
+    --font-primary: 'Barlow', 'Segoe UI', sans-serif;
+    --font-display: 'Orbitron', 'Rajdhani', sans-serif;
+    
+    /* Animation */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Spacing & Layout */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+  }
+  
+  /* ================= Global Styles & Typography ================= */
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap');
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: var(--font-primary);
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(38, 89, 115, 0.15) 0%, rgba(11, 22, 35, 0.1) 30%),
+      linear-gradient(to bottom, var(--bg-primary), var(--bg-secondary)),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a3c54' fill-opacity='0.12'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: 
+      radial-gradient(circle at 15% 85%, rgba(0, 229, 255, 0.06) 0%, transparent 25%),
+      radial-gradient(circle at 85% 15%, rgba(189, 87, 255, 0.06) 0%, transparent 25%);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: 1px;
+    margin-bottom: var(--space-md);
+    font-weight: 600;
+  }
+  
+  h1 {
+    margin: 12px 0 16px 20px;
+    color: var(--accent-primary);
+    font-size: 28px;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+    position: relative;
+  }
+  
+  h1::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-primary), transparent);
+  }
+  
+  h3 {
+    color: var(--accent-secondary);
+    text-shadow: 0 0 4px rgba(77, 124, 254, 0.4);
+    font-size: 18px;
+    position: relative;
+    display: inline-block;
+  }
+  
+  button {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  
+  /* ================= Layout ================= */
+  #container-main {
+    display: flex;
+    margin: 0 auto;
+    max-width: 1800px;
+  }
+  
+  #main-area {
+    flex: 1;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding-bottom: var(--space-md);
+  }
+  
+  #panel {
+    min-width: 340px;
+    max-width: 400px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.4);
+    padding: var(--space-lg) var(--space-md);
+    margin-left: 0;
+    z-index: 5;
+    position: relative;
+  }
+  
+  #panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+  }
+  
+  #panel h3 {
+    margin: var(--space-xs) 0 var(--space-md) 0;
+  }
+  
+  .ground {
+    background: linear-gradient(to bottom, rgba(19, 39, 74, 0.7), rgba(13, 25, 42, 0.9));
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    min-height: 70px;
+    width: 100%;
+    border-top: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    position: relative;
+  }
+  
+  .ground::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      var(--accent-primary) 20%, 
+      var(--accent-primary) 80%, 
+      transparent 100%);
+    opacity: 0.7;
+    animation: scanline 4s linear infinite;
+  }
+  
+  .ground::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(0, 229, 255, 0.03) 0px,
+      rgba(0, 229, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 25px
+    );
+    z-index: -1;
+  }
+  
+  @keyframes scanline {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  /* ================= Grid (Block Palette) ================= */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-sm);
+    border-radius: var(--border-radius-md);
+    background: rgba(13, 25, 42, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(30, 46, 76, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-fast);
+  }
+  
+  .cell.drag-over {
+    background-color: rgba(0, 229, 255, 0.1);
+    border-color: var(--accent-primary);
+    border-style: dashed;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2), 
+                inset 0 0 5px rgba(0, 229, 255, 0.1);
+  }
+  
+  /* ================= Blocks (In Grid) ================= */
+  .block {
+    background: linear-gradient(135deg, rgba(30, 46, 76, 0.9), rgba(20, 30, 55, 0.9));
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 12px;
+    cursor: grab;
+    text-align: center;
+    width: 100%;
+    min-height: 28px;
+    line-height: 1.4;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--accent-primary);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all var(--transition-fast);
+  }
+  
+  .block:hover {
+    color: var(--text-primary);
+    text-shadow: 0 0 4px var(--accent-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3),
+                inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  .block.dragging {
+    opacity: 0.6;
+    cursor: grabbing;
+    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* ================= Markers (On Main Area) ================= */
+  #markers-on-ground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  .block-marker {
+    position: relative;
+    background-color: rgba(0, 229, 255, 0.08);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 11px;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+    z-index: 10;
+    color: var(--accent-primary);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    transition: all var(--transition-fast);
+  }
+  
+  .block-marker:hover {
+    background-color: rgba(0, 229, 255, 0.12);
+    border-color: rgba(0, 229, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+  }
+  
+  .block-marker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  
+  /* ================= Agents (On Main Area) ================= */
+  #agents-on-ground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+  }
+  
+  .agent-container {
+    width: 48px;
+    height: 48px;
+    pointer-events: auto;
+    z-index: 20;
+    position: absolute;
+    transition: top 2.5s ease-in-out, left 2s ease-in-out;
+  }
+  
+  .agent {
+    width: 48px;
+    height: 48px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(100, 100, 100, 0.2) 80%);
+    border-radius: 50%;
+    border: 2px solid rgba(54, 241, 205, 0.7);
+    box-shadow: 
+      0 0 15px rgba(54, 241, 205, 0.6),
+      inset 0 0 15px rgba(54, 241, 205, 0.4),
+      0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--bg-primary);
+    line-height: 44px;
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    pointer-events: auto;
+    z-index: 20;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+    transition: all var(--transition-medium);
+  }
+  
+  .agent::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(180, 180, 180, 0.2));
+    z-index: -1;
+    opacity: 0.6;
+  }
+  
+  .agent::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(54, 241, 205, 0.15), transparent 70%);
+    z-index: -2;
+    animation: pulse 3s infinite alternate;
+  }
+  
+  .agent.qa-agent {
+    border-color: rgba(189, 87, 255, 0.7);
+    box-shadow: 
+      0 0 15px rgba(189, 87, 255, 0.6),
+      inset 0 0 15px rgba(189, 87, 255, 0.4),
+      0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .agent.qa-agent::after {
+    background: radial-gradient(circle at center, rgba(189, 87, 255, 0.15), transparent 70%);
+  }
+  
+  .agent.selected {
+    border-width: 3px;
+    box-shadow: 
+      0 0 25px rgba(54, 241, 205, 0.8),
+      inset 0 0 20px rgba(54, 241, 205, 0.5),
+      0 5px 20px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
+    z-index: 21;
+  }
+  
+  .agent.qa-agent.selected {
+    box-shadow: 
+      0 0 25px rgba(189, 87, 255, 0.8),
+      inset 0 0 20px rgba(189, 87, 255, 0.5),
+      0 5px 20px rgba(0, 0, 0, 0.4);
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.4; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1.02); }
+  }
+  
+  /* ================= Delete Buttons ================= */
+  .delete-button {
+    position: absolute;
+    background-color: rgba(255, 61, 113, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 15px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    z-index: 30;
+    display: none;
+    box-shadow: 0 0 8px rgba(255, 61, 113, 0.5);
+    transition: all var(--transition-fast);
+  }
+  
+  .delete-button:hover {
+    background-color: var(--accent-tertiary);
+    box-shadow: 0 0 12px rgba(255, 61, 113, 0.8);
+    transform: scale(1.1);
+  }
+  
+  .delete-grid-block-button {
+    top: -4px;
+    right: -4px;
+  }
+  
+  .block:hover .delete-grid-block-button {
+    display: block;
+  }
+  
+  .delete-marker-button {
+    top: -4px;
+    right: -4px;
+    z-index: 11;
+  }
+  
+  .block-marker:hover .delete-marker-button {
+    display: block;
+  }
+  
+  .delete-agent-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: rgba(255, 61, 113, 0.8);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 25;
+    box-shadow: 0 0 8px rgba(255, 61, 113, 0.5);
+    transition: all var(--transition-fast);
+  }
+  
+  .delete-agent-btn:hover {
+    background-color: var(--accent-tertiary);
+    box-shadow: 0 0 12px rgba(255, 61, 113, 0.8);
+    transform: scale(1.1);
+  }
+  
+  /* ================= Modals ================= */
+  .modal-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(2, 9, 20, 0.7);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 88;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .modal-box {
+    background: var(--panel-bg);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-lg);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 229, 255, 0.15);
+    min-width: 360px;
+    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top: 2px solid rgba(0, 229, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .modal-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* Form Elements in Modal */
+  #spawn-agent-modal-bg select,
+  #spawn-agent-modal-bg input[type="text"] {
+    padding: var(--space-sm);
+    margin-top: var(--space-xs);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+    background: rgba(13, 25, 42, 0.5);
+    color: var(--text-primary);
+    box-sizing: border-box;
+    width: 95%;
+    transition: all var(--transition-fast);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    font-family: var(--font-primary);
+  }
+  
+  #spawn-agent-modal-bg select:focus,
+  #spawn-agent-modal-bg input[type="text"]:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1),
+                inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  #spawn-agent-modal-bg label {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+  }
+  
+  #spawn-agent-modal-bg p {
+    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+  }
+  
+  /* Button styles */
+  button.btn {
+    background: linear-gradient(135deg, rgba(30, 46, 76, 0.9), rgba(20, 30, 55, 0.9));
+    color: var(--accent-primary);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-xs) var(--space-md);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    letter-spacing: 0.5px;
+    margin-right: var(--space-sm);
+    font-family: var(--font-display);
+  }
+  
+  button.btn:hover {
+    color: var(--text-primary);
+    text-shadow: 0 0 4px var(--accent-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3),
+                inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  button.btn:active {
+    transform: translateY(1px);
+    box-shadow: var(--pressed-shadow);
+  }
+  
+  /* ================= Log ================= */
+  #log {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: rgba(13, 25, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    margin-top: var(--space-md);
+    line-height: 1.4;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Improved scrollbar for log area */
+  #log::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #log::-webkit-scrollbar-track {
+    background: rgba(13, 25, 42, 0.5);
+    border-radius: var(--border-radius-sm);
+  }
+  
+  #log::-webkit-scrollbar-thumb {
+    background: rgba(0, 229, 255, 0.2);
+    border-radius: var(--border-radius-sm);
+  }
+  
+  #log::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 229, 255, 0.3);
+  }
+  
+  #log div {
+    margin-bottom: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  }
+  
+  #log div:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  /* ================= Drag/Drop States ================= */
+  #main-area.drag-over {
+    background-color: rgba(0, 229, 255, 0.05);
+    outline: 2px dashed var(--accent-primary);
+    outline-offset: -4px;
+  }
+  
+  /* ================= Zones (Finish & Dropoff) ================= */
+  .finish-zone {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 229, 255, 0.05);
+    border: 2px dashed rgba(0, 229, 255, 0.5);
+    border-radius: var(--border-radius-sm);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--accent-primary);
+    font-weight: 600;
+    box-sizing: border-box;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+    transition: all var(--transition-fast);
+  }
+  
+  .finish-zone::before {
+    content: '';
+    position: absolute;
+    width: 94px;
+    height: 94px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: calc(var(--border-radius-sm) - 1px);
+  }
+  
+  .finish-zone::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(45deg, rgba(0, 229, 255, 0.1) 25%, transparent 25%), 
+      linear-gradient(-45deg, rgba(0, 229, 255, 0.1) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(0, 229, 255, 0.1) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(0, 229, 255, 0.1) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border-radius: var(--border-radius-sm);
+    opacity: 0.3;
+  }
+  
+  .dropoff-zone {
+    background-color: rgba(255, 170, 0, 0.05);
+    border: 2px dashed rgba(255, 170, 0, 0.5);
+    color: rgba(255, 170, 0, 0.9);
+    box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
+  }
+  
+  .dropoff-zone::before {
+    border-color: rgba(255, 170, 0, 0.2);
+  }
+  
+  .dropoff-zone::after {
+    background-image: 
+      linear-gradient(45deg, rgba(255, 170, 0, 0.1) 25%, transparent 25%), 
+      linear-gradient(-45deg, rgba(255, 170, 0, 0.1) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255, 170, 0, 0.1) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255, 170, 0, 0.1) 75%);
+  }
+  
+  .finish-zone:hover, .dropoff-zone:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+  }
+  
+  .dropoff-zone:hover {
+    box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+  }
+  
+  .finish-zone.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    border-style: solid;
+    z-index: 1000;
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+  }
+  
+  .dropoff-zone.dragging {
+    box-shadow: 0 0 25px rgba(255, 170, 0, 0.4);
+  }
+  
+  /* ================= Agent Progress Indicator ================= */
+  .agent-progress {
+    position: absolute;
+    bottom: -12px;
+    left: 10%;
+    width: 80%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .agent-progress::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: 2px;
+    animation: agentWorkingAnimation 5s linear infinite;
+  }
+  
+  .agent .agent-progress::after {
+    background-color: var(--accent-dev);
+    box-shadow: 0 0 10px var(--accent-dev);
+  }
+  
+  .agent.qa-agent .agent-progress::after {
+    background-color: var(--accent-qa);
+    box-shadow: 0 0 10px var(--accent-qa);
+  }
+  
+  @keyframes agentWorkingAnimation {
+    0% { width: 0%; opacity: 0.6; }
+    50% { opacity: 1; }
+    95% { width: 100%; opacity: 0.8; }
+    100% { width: 100%; }
+  }
+  
+  /* ================= Responsive Adjustments ================= */
+  @media (max-width: 900px) {
+    #container-main {
+      flex-direction: column-reverse;
+    }
+    
+    #panel {
+      min-width: 100%;
+      max-width: 100%;
+      border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    
+    #main-area {
+      min-height: 60vh;
+    }
+    
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 500px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cell {
+      width: 65px;
+      height: 65px;
+    }
+    
+    .modal-box {
+      min-width: 300px;
+      padding: var(--space-md);
+    }
+  }
+
+    /* Add near other layout styles */
+#panel {
+  /* Your existing styles: min-width, background, border, etc. */
+  min-width: 340px; /* Default width */
+  max-width: 400px;
+  position: relative; /* Needed for absolute positioning of the button */
+  transition: min-width 0.3s ease-in-out, max-width 0.3s ease-in-out, padding 0.3s ease-in-out; /* Smooth transition */
+  overflow: hidden; /* Hide content when minimized */
+  /* Add flex properties if needed for content alignment */
+  display: flex;
+  flex-direction: column;
+}
+
+#toggle-panel-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px; /* Position inside the panel */
+  z-index: 100; /* Ensure it's above other panel content */
+  padding: 2px 6px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  /* Add styling matching your theme (e.g., neumorphic/glassmorphic) */
+  background: var(--panel-bg, #eee); /* Use theme variable or fallback */
+  color: var(--neon-accent, #333);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px var(--neumorphic-shadow-dark, rgba(0,0,0,0.2)),
+             -2px -2px 4px var(--neumorphic-shadow-light, rgba(255,255,255,0.1));
+}
+#toggle-panel-btn:hover {
+    color: var(--text-color, #000);
+    box-shadow: inset 1px 1px 2px var(--neumorphic-shadow-dark, rgba(0,0,0,0.3)),
+                inset -1px -1px 2px var(--neumorphic-shadow-light, rgba(255,255,255,0.2)),
+                0 0 5px var(--neon-accent, #00e5ff); /* Optional glow */
+}
+
+
+/* Minimized State for the Panel */
+#panel.minimized {
+  min-width: 40px; /* Width when collapsed */
+  max-width: 40px;
+  padding-left: 0; /* Remove padding */
+  padding-right: 0;
+}
+
+/* Hide panel content when minimized, except the button */
+#panel.minimized > *:not(#toggle-panel-btn) {
+  display: none; /* Hide all direct children except the button */
+  /* Alternative: use visibility: hidden; opacity: 0; if display:none causes issues */
+}
+
+/* Change button text/icon when panel is minimized */
+#panel.minimized #toggle-panel-btn::before {
+   content: "»"; /* Change symbol to expand */
+}
+#panel:not(.minimized) #toggle-panel-btn::before {
+   content: "«"; /* Default symbol to collapse */
+}
+/* Hide original button text if using ::before for icon */
+ #toggle-panel-btn {
+   font-size: 0; /* Hide original text if using pseudo-element */
+ }
+ #toggle-panel-btn::before {
+    font-size: 16px; /* Set size for the pseudo-element icon */
+ }
+
+ /* Optional: Make main area expand - depends on #container-main being flex */
+ #container-main {
+    display: flex; /* Ensure container is flex */
+ }
+ #main-area {
+    flex: 1; /* Allow main area to grow */
+    transition: flex-grow 0.3s ease-in-out; /* Smooth transition if needed */
+ }

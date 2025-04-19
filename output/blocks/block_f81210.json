@@ -1,0 +1,5 @@
+{
+  "title": "Ball Physics Demo",
+  "description": "Create a single HTML page with a canvas element (800x600 pixels). Simulate 10 colored balls of varying sizes starting at random positions. Implement realistic bouncing off the four walls of the canvas and basic gravity pulling them downwards. Ensure balls also bounce off each other accurately.",
+  "block_id": "block_f81210"
+}

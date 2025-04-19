@@ -1,0 +1,717 @@
+/* ================= Base Variables ================= */
+:root {
+    /* Primary Colors */
+    --bg-color: #002b36;
+    --terminal-green: #26a269;
+    --terminal-border: #2aa198;
+    --panel-bg: #073642;
+    --text-primary: #93a1a1;
+    --text-bright: #eee8d5;
+    --accent-orange: #cb4b16;
+    --accent-yellow: #b58900;
+    --accent-purple: #d33682;
+    
+    /* UI Elements */
+    --grid-bg: #00252e;
+    --button-bg: #174652;
+    --button-hover: #205f6d;
+    --shadow: rgba(0, 0, 0, 0.4);
+  }
+  
+  /* ================= Core Styles ================= */
+  @font-face {
+    font-family: 'VT323';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/vt323/v17/pxiKyp0ihIEF2isfFJU.woff2) format('woff2');
+  }
+  
+  @font-face {
+    font-family: 'Share Tech Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/sharetechmono/v15/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2) format('woff2');
+  }
+  
+  body {
+    font-family: 'Share Tech Mono', monospace;
+    margin: 0;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.4;
+    background-image: 
+      linear-gradient(rgba(0, 43, 54, 0.95), rgba(0, 43, 54, 0.95)),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 200, 200, 0.05) 2px, rgba(0, 200, 200, 0.05) 4px);
+  }
+  
+  h1 {
+    margin: 20px 0 20px 20px;
+    color: var(--terminal-green);
+    font-family: 'VT323', monospace;
+    font-size: 32px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(38, 162, 105, 0.5);
+    position: relative;
+  }
+  
+  h1::before {
+    content: "> ";
+    color: var(--terminal-border);
+  }
+  
+  h1::after {
+    content: "_";
+    animation: blink 1s step-end infinite;
+  }
+  
+  @keyframes blink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  /* ================= Layout ================= */
+  #container-main {
+    display: flex;
+    height: calc(100vh - 80px);
+    margin: 0 15px;
+    border: 2px solid var(--terminal-border);
+    box-shadow: 0 0 20px rgba(42, 161, 152, 0.3), inset 0 0 10px rgba(42, 161, 152, 0.1);
+  }
+  
+  #main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-color);
+    border-right: 2px solid var(--terminal-border);
+  }
+  
+  #panel {
+    width: 380px;
+    background: var(--panel-bg);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #panel h3 {
+    margin: 0 0 15px 0;
+    color: var(--accent-orange);
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    text-transform: uppercase;
+    border-bottom: 1px dashed var(--terminal-border);
+    padding-bottom: 8px;
+  }
+  
+  .ground {
+    height: 70px;
+    width: 100%;
+    background-color: var(--panel-bg);
+    background-image: 
+      linear-gradient(rgba(7, 54, 66, 0.9), rgba(7, 54, 66, 0.9)),
+      repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(42, 161, 152, 0.1) 30px, rgba(42, 161, 152, 0.1) 31px);
+    border-top: 2px solid var(--terminal-border);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .ground::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(42, 161, 152, 0.5) 20%, 
+      rgba(42, 161, 152, 0.5) 80%, 
+      transparent);
+    opacity: 0.7;
+  }
+  
+  /* ================= Grid (Block Palette) ================= */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--grid-bg);
+    border: 1px solid var(--terminal-border);
+  }
+  
+  .cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(7, 54, 66, 0.8);
+    border: 1px solid var(--terminal-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  
+  .cell.drag-over {
+    background-color: rgba(38, 162, 105, 0.2);
+    border-style: dashed;
+    border-width: 2px;
+  }
+  
+  /* ================= Blocks (In Grid) ================= */
+  .block {
+    background: rgba(38, 162, 105, 0.2);
+    border: 1px solid var(--terminal-green);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: 'Share Tech Mono', monospace;
+    cursor: grab;
+    text-align: center;
+    width: 100%;
+    min-height: 24px;
+    line-height: 1.5;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--terminal-green);
+    box-shadow: inset 0 0 10px rgba(38, 162, 105, 0.1);
+    transition: all 0.2s;
+  }
+  
+  .block::before {
+    content: '[';
+    margin-right: 3px;
+    color: var(--text-bright);
+  }
+  
+  .block::after {
+    content: ']';
+    margin-left: 3px;
+    color: var(--text-bright);
+  }
+  
+  .block:hover {
+    background: rgba(38, 162, 105, 0.3);
+    border-color: var(--terminal-green);
+    box-shadow: 0 0 15px rgba(38, 162, 105, 0.3);
+  }
+  
+  .block.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    transform: scale(0.95);
+  }
+  
+  /* ================= Markers (On Main Area) ================= */
+  .block-marker {
+    position: relative;
+    background-color: rgba(38, 162, 105, 0.15);
+    border: 1px solid var(--terminal-green);
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+    z-index: 10;
+    color: var(--terminal-green);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  
+  .block-marker::before {
+    content: '$ ';
+    color: var(--text-bright);
+  }
+  
+  /* ================= Agents (On Main Area) ================= */
+  .agent-container {
+    width: 50px;
+    height: 50px;
+    pointer-events: auto;
+    z-index: 20;
+    position: absolute;
+    transition: top 2.5s ease-in-out, left 2s ease-in-out;
+  }
+  
+  .agent {
+    width: 50px;
+    height: 50px;
+    background: rgba(38, 162, 105, 0.3);
+    border: 2px solid var(--terminal-green);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(38, 162, 105, 0.6);
+    text-align: center;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--text-bright);
+    line-height: 48px;
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 5px var(--terminal-green);
+  }
+  
+  .agent::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    animation: rotate 8s linear infinite;
+  }
+  
+  .agent::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    border: 1px solid rgba(38, 162, 105, 0.2);
+    animation: pulse 3s infinite alternate;
+  }
+  
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(0.98); opacity: 0.2; }
+    100% { transform: scale(1.05); opacity: 1; }
+  }
+  
+  .agent.qa-agent {
+    background: rgba(211, 54, 130, 0.3);
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 15px rgba(211, 54, 130, 0.6);
+    text-shadow: 0 0 5px var(--accent-purple);
+  }
+  
+  .agent.qa-agent::before {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .agent.qa-agent::after {
+    border-color: rgba(211, 54, 130, 0.2);
+  }
+  
+  .agent.selected {
+    border-width: 3px;
+    box-shadow: 0 0 20px rgba(38, 162, 105, 1);
+    z-index: 21;
+  }
+  
+  .agent.qa-agent.selected {
+    box-shadow: 0 0 20px rgba(211, 54, 130, 1);
+  }
+  
+  /* ================= Delete Buttons ================= */
+  .delete-button {
+    position: absolute;
+    background-color: var(--accent-orange);
+    color: var(--text-bright);
+    border: none;
+    border-radius: 4px;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    line-height: 15px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    z-index: 30;
+    display: none;
+    font-family: monospace;
+  }
+  
+  .delete-button:hover {
+    background-color: #e45e23;
+    box-shadow: 0 0 8px rgba(203, 75, 22, 0.8);
+  }
+  
+  .delete-grid-block-button {
+    top: -6px;
+    right: -6px;
+  }
+  
+  .block:hover .delete-grid-block-button {
+    display: block;
+  }
+  
+  .delete-marker-button {
+    top: -6px;
+    right: -6px;
+    z-index: 11;
+  }
+  
+  .block-marker:hover .delete-marker-button {
+    display: block;
+  }
+  
+  .delete-agent-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--accent-orange);
+    color: var(--text-bright);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 25;
+    box-shadow: 0 0 5px rgba(203, 75, 22, 0.5);
+    font-family: monospace;
+  }
+  
+  .delete-agent-btn:hover {
+    background-color: #e45e23;
+    box-shadow: 0 0 8px rgba(203, 75, 22, 0.8);
+  }
+  
+  /* ================= Modals ================= */
+  .modal-bg {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 43, 54, 0.85);
+    z-index: 88;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+  }
+  
+  .modal-box {
+    background: var(--panel-bg);
+    border: 2px solid var(--terminal-border);
+    box-shadow: 0 0 20px rgba(42, 161, 152, 0.4);
+    padding: 25px;
+    min-width: 340px;
+    max-width: 450px;
+    position: relative;
+  }
+  
+  .modal-box::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 1px dashed rgba(42, 161, 152, 0.5);
+    pointer-events: none;
+  }
+  
+  .modal-box h3 {
+    margin-top: 0;
+    color: var(--accent-orange);
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    text-transform: uppercase;
+    border-bottom: 1px dashed var(--terminal-border);
+    padding-bottom: 8px;
+  }
+  
+  /* Form Elements in Modal */
+  #spawn-agent-modal-bg select,
+  #spawn-agent-modal-bg input[type="text"],
+  textarea {
+    background: var(--grid-bg);
+    border: 1px solid var(--terminal-border);
+    color: var(--text-bright);
+    padding: 8px;
+    margin-top: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    width: 95%;
+    font-size: 14px;
+  }
+  
+  #spawn-agent-modal-bg select:focus,
+  #spawn-agent-modal-bg input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--terminal-green);
+    box-shadow: 0 0 10px rgba(38, 162, 105, 0.3);
+  }
+  
+  #spawn-agent-modal-bg label {
+    color: var(--text-bright);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+  }
+  
+  input[type="checkbox"] {
+    accent-color: var(--terminal-green);
+  }
+  
+  /* ================= Buttons ================= */
+  button {
+    background: var(--button-bg);
+    color: var(--text-bright);
+    border: 1px solid var(--terminal-border);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  button:hover {
+    background: var(--button-hover);
+    box-shadow: 0 0 10px rgba(42, 161, 152, 0.4);
+    border-color: var(--terminal-green);
+  }
+  
+  button:active {
+    transform: translateY(2px);
+  }
+  
+  /* ================= Log ================= */
+  #log {
+    flex-grow: 1;
+    margin-top: 15px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #93a1a1;
+    background: #001a21;
+    border: 1px solid var(--terminal-border);
+    padding: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    line-height: 1.5;
+    height: 200px;
+  }
+  
+  #log div {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+  }
+  
+  #log div:before {
+    content: '> ';
+    color: var(--terminal-green);
+  }
+  
+  /* Custom scrollbar for log */
+  #log::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #log::-webkit-scrollbar-track {
+    background: #001a21;
+  }
+  
+  #log::-webkit-scrollbar-thumb {
+    background: var(--terminal-border);
+    border-radius: 0;
+  }
+  
+  /* ================= Zones ================= */
+  .finish-zone {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    background: rgba(38, 162, 105, 0.1);
+    border: 2px dashed var(--terminal-green);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--terminal-green);
+    font-weight: bold;
+    box-sizing: border-box;
+    font-family: 'VT323', monospace;
+    text-transform: uppercase;
+  }
+  
+  .dropoff-zone {
+    background: rgba(181, 137, 0, 0.1);
+    border: 2px dashed var(--accent-yellow);
+    color: var(--accent-yellow);
+  }
+  
+  .finish-zone.dragging,
+  .dropoff-zone.dragging {
+    cursor: grabbing;
+    opacity: 0.8;
+    border-style: solid;
+    z-index: 1000;
+  }
+  
+  /* ================= Agent Progress Indicator ================= */
+  .agent-progress {
+    position: absolute;
+    bottom: -12px;
+    left: 10%;
+    width: 80%;
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+  
+  .agent-progress::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    background-color: var(--terminal-green);
+    animation: agentWorkingAnimation 5s linear infinite;
+  }
+  
+  .agent.qa-agent .agent-progress::after {
+    background-color: var(--accent-purple);
+  }
+  
+  @keyframes agentWorkingAnimation {
+    0% { width: 0%; }
+    95% { width: 100%; }
+    100% { width: 100%; }
+  }
+  
+  /* ================= Main Area Scanlines Effect ================= */
+  #main-area::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 0, 0, 0.05) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.2;
+  }
+  
+  /* ================= Responsive Design ================= */
+  @media (max-width: 768px) {
+    #container-main {
+      flex-direction: column;
+      height: auto;
+    }
+  
+    #panel {
+      width: 100%;
+      border-top: 2px solid var(--terminal-border);
+      border-right: none;
+    }
+  
+    #main-area {
+      min-height: 60vh;
+    }
+  
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+    /* Add near other layout styles */
+#panel {
+  /* Your existing styles: min-width, background, border, etc. */
+  min-width: 340px; /* Default width */
+  max-width: 400px;
+  position: relative; /* Needed for absolute positioning of the button */
+  transition: min-width 0.3s ease-in-out, max-width 0.3s ease-in-out, padding 0.3s ease-in-out; /* Smooth transition */
+  overflow: hidden; /* Hide content when minimized */
+  /* Add flex properties if needed for content alignment */
+  display: flex;
+  flex-direction: column;
+}
+
+#toggle-panel-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px; /* Position inside the panel */
+  z-index: 100; /* Ensure it's above other panel content */
+  padding: 2px 6px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  /* Add styling matching your theme (e.g., neumorphic/glassmorphic) */
+  background: var(--panel-bg, #eee); /* Use theme variable or fallback */
+  color: var(--neon-accent, #333);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px var(--neumorphic-shadow-dark, rgba(0,0,0,0.2)),
+             -2px -2px 4px var(--neumorphic-shadow-light, rgba(255,255,255,0.1));
+}
+#toggle-panel-btn:hover {
+    color: var(--text-color, #000);
+    box-shadow: inset 1px 1px 2px var(--neumorphic-shadow-dark, rgba(0,0,0,0.3)),
+                inset -1px -1px 2px var(--neumorphic-shadow-light, rgba(255,255,255,0.2)),
+                0 0 5px var(--neon-accent, #00e5ff); /* Optional glow */
+}
+
+
+/* Minimized State for the Panel */
+#panel.minimized {
+  min-width: 40px; /* Width when collapsed */
+  max-width: 40px;
+  padding-left: 0; /* Remove padding */
+  padding-right: 0;
+}
+
+/* Hide panel content when minimized, except the button */
+#panel.minimized > *:not(#toggle-panel-btn) {
+  display: none; /* Hide all direct children except the button */
+  /* Alternative: use visibility: hidden; opacity: 0; if display:none causes issues */
+}
+
+/* Change button text/icon when panel is minimized */
+#panel.minimized #toggle-panel-btn::before {
+   content: "»"; /* Change symbol to expand */
+}
+#panel:not(.minimized) #toggle-panel-btn::before {
+   content: "«"; /* Default symbol to collapse */
+}
+/* Hide original button text if using ::before for icon */
+ #toggle-panel-btn {
+   font-size: 0; /* Hide original text if using pseudo-element */
+ }
+ #toggle-panel-btn::before {
+    font-size: 16px; /* Set size for the pseudo-element icon */
+ }
+
+ /* Optional: Make main area expand - depends on #container-main being flex */
+ #container-main {
+    display: flex; /* Ensure container is flex */
+ }
+ #main-area {
+    flex: 1; /* Allow main area to grow */
+    transition: flex-grow 0.3s ease-in-out; /* Smooth transition if needed */
+ }

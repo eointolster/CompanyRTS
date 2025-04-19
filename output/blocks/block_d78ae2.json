@@ -1,0 +1,5 @@
+{
+  "title": "Nebula",
+  "description": "Create a single HTML page with a full-screen canvas. Generate 500 small, white circular particles randomly distributed. Make the particles drift slowly and randomly. When the mouse cursor moves over the canvas, particles within a 100-pixel radius should gently accelerate away from the cursor. Particles should fade slightly if they approach the edge of the canvas.",
+  "block_id": "block_d78ae2"
+}

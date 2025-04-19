@@ -1,0 +1,1950 @@
+--- FIX_START app.js ---
+// app.js - Main application for Rotating Square with Gravity Balls
+
+// Canvas setup
+const canvas = document.getElementById('canvas');
+if (!canvas) {
+    throw new Error("Canvas element not found!");
+}
+const ctx = canvas.getContext('2d');
+let width, height;
+
+// Import classes from window object
+const Ball = window.Ball;
+const Container = window.Container;
+const InputManager = window.InputManager;
+// const Physics = window.Physics; // Not directly used in this revised structure
+// const Renderer = window.Renderer; // Not directly used for core drawing in this structure
+
+if (!Ball || !Container || !InputManager) {
+    throw new Error("Required classes (Ball, Container, InputManager) not found. Check script loading order.");
+}
+
+// Get UI elements for initial config values
+const rotationSpeedInput = document.getElementById('rotationSpeed');
+const squareColorInput = document.getElementById('squareColor');
+const ballCountInput = document.getElementById('ballCount');
+const minSizeInput = document.getElementById('minSize');
+const maxSizeInput = document.getElementById('maxSize');
+const gravityInput = document.getElementById('gravity');
+const bounceInput = document.getElementById('bounce');
+const frictionInput = document.getElementById('friction');
+
+// Add checks for UI elements
+if (!rotationSpeedInput || !squareColorInput || !ballCountInput || !minSizeInput || !maxSizeInput || !gravityInput || !bounceInput || !frictionInput) {
+    console.warn("One or more UI control elements are missing.");
+}
+
+// Configuration
+let config = {
+    rotationSpeed: rotationSpeedInput ? parseFloat(rotationSpeedInput.value) : 1,
+    squareColor: squareColorInput ? squareColorInput.value : '#4CAF50',
+    ballCount: ballCountInput ? parseInt(ballCountInput.value) : 20,
+    minSize: minSizeInput ? parseInt(minSizeInput.value) : 10,
+    maxSize: maxSizeInput ? parseInt(maxSizeInput.value) : 30,
+    gravity: gravityInput ? parseFloat(gravityInput.value) : 0.2,
+    bounce: bounceInput ? parseFloat(bounceInput.value) : 0.7,
+    friction: frictionInput ? parseFloat(frictionInput.value) : 0.99,
+    angle: 0 // This will be kept in sync with container.angle
+};
+
+// Core components
+let container;
+let inputManager;
+let balls = [];
+
+// Resize canvas function
+function resizeCanvas() {
+    width = Math.min(window.innerWidth - 40, 800);
+    height = Math.min(window.innerHeight - 200, 600);
+    canvas.width = width;
+    canvas.height = height;
+    if (container) {
+        container.resize(width, height);
+    }
+}
+
+// Create balls function
+function createBalls() {
+    balls = [];
+    if (!container) return; // Need container dimensions
+
+    // Ensure ball count, minSize, maxSize are valid numbers in config
+    config.ballCount = Math.max(1, parseInt(config.ballCount) || 20);
+    config.minSize = Math.max(1, parseInt(config.minSize) || 10);
+    config.maxSize = Math.max(config.minSize, parseInt(config.maxSize) || 30);
+
+    for (let i = 0; i < config.ballCount; i++) {
+        // Pass config, width, height to Ball constructor
+        balls.push(new Ball(config, width, height));
+    }
+}
+
+// Main animation loop
+function update() {
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Update and draw container
+    container.rotate(config.rotationSpeed);
+    config.angle = container.angle; // Sync angle for ball collision logic if needed
+    container.draw(ctx, config.squareColor);
+
+    // Apply interactive force fields
+    const forceFields = inputManager.getForceFields();
+    balls.forEach(ball => {
+        forceFields.forEach(field => {
+            const dx = field.position.x - ball.x;
+            const dy = field.position.y - ball.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < field.radius && distance > 0.1) { // Avoid division by zero or tiny distance
+                const forceMagnitude = (field.strength * 100) / distance; // Scale strength
+                const forceX = (dx / distance) * forceMagnitude;
+                const forceY = (dy / distance) * forceMagnitude;
+                ball.applyForce(forceX, forceY);
+            } else if (distance <= 0.1 && field.strength < 0) { // Strong repulsion if too close
+                 ball.applyForce(Math.random() -0.5 , Math.random() -0.5 ); // Push away randomly
+            }
+        });
+        // Optional: Apply other forces like centrifugal force
+        // container.applyCentrifugalForce(ball, config.rotationSpeed);
+    });
+
+
+    // Update and draw balls
+    balls.forEach(ball => {
+        ball.update(); // Includes gravity, friction, movement, and square collision checks
+        ball.draw(ctx); // Use Ball's own draw method
+    });
+
+    // Handle ball-to-ball collisions
+    for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+            balls[i].checkBallCollision(balls[j]);
+        }
+    }
+
+    // Continue animation
+    requestAnimationFrame(update);
+}
+
+// Initialize and start the application
+function init() {
+    // Resize canvas initially
+    resizeCanvas();
+
+    // Instantiate container
+    container = new Container(width, height);
+
+    // Instantiate InputManager - handles all UI listeners now
+    // Pass the actual createBalls function as the callback
+    inputManager = new InputManager(canvas, config, createBalls);
+
+    // Initialize balls
+    createBalls();
+
+    // Start animation loop
+    update();
+}
+
+// Set up event listeners
+window.addEventListener('resize', resizeCanvas);
+
+// Start the application when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // DOMContentLoaded has already fired
+    init();
+}
+
+// Export app functionality to window if needed (optional)
+window.RotatingSquareApp = {
+    init: init,
+    createBalls: createBalls,
+    update: update,
+    config: config,
+    balls: balls,
+    container: container,
+    inputManager: inputManager
+};
+--- FIX_END ---
+--- FIX_START ball.js ---
+// ball.js - Defines the Ball class with properties and methods
+
+/**
+ * Ball class for creating and managing balls that respond to gravity
+ * and interact with a rotating square.
+ */
+class Ball {
+    /**
+     * Create a new ball with random properties
+     * @param {Object} config - Configuration object containing min/max size and other properties
+     * @param {number} width - Canvas width
+     * @param {number} height - Canvas height
+     */
+    constructor(config, width, height) {
+        // Ensure config, width, height are provided
+        if (!config || typeof width !== 'number' || typeof height !== 'number') {
+             throw new Error("Ball constructor requires config, width, and height.");
+        }
+        this.config = config;
+        this.width = width;
+        this.height = height;
+        this.reset();
+    }
+
+    /**
+     * Reset the ball with random properties
+     */
+    reset() {
+        this.size = Math.random() * (this.config.maxSize - this.config.minSize) + this.config.minSize;
+        // Ensure spawn position is valid even if width/height are small
+        this.x = Math.random() * Math.max(0, this.width - this.size * 2) + this.size;
+        this.y = Math.random() * Math.max(0, this.height - this.size * 2) + this.size;
+        this.vx = (Math.random() - 0.5) * 5;
+        this.vy = (Math.random() - 0.5) * 5;
+        this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        this.mass = Math.PI * Math.pow(this.size / 2, 2); // Mass proportional to area (or use volume: (4/3)*PI*r^3) -> Let's use size^2 for simplicity now
+        this.restitution = 0.7 + (Math.random() * 0.3); // Slight variation in bounce
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+        this.rotation = 0;
+        this.trail = [];
+        this.maxTrailLength = 10;
+        this.trailUpdateCounter = 0;
+
+        // Create patterns on some balls
+        this.pattern = Math.random() > 0.7;
+        this.patternType = Math.floor(Math.random() * 3);
+        this.patternColor = `hsl(${Math.random() * 360}, 70%, 40%)`;
+
+        // Add a subtle shadow for 3D effect
+        this.shadowOffset = this.size * 0.1;
+        this.shadowBlur = this.size * 0.5; // Not used in current draw, but kept for potential future use
+    }
+
+    /**
+     * Update the ball's position and velocity
+     */
+    update() {
+        // Update trail
+        if (this.trailUpdateCounter++ % 3 === 0) {
+            this.updateTrail();
+        }
+
+        // Apply gravity using config value
+        this.vy += this.config.gravity;
+
+        // Apply friction using config value
+        this.vx *= this.config.friction;
+        this.vy *= this.config.friction;
+
+        // Move ball
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Update rotation
+        this.rotation += this.rotationSpeed;
+
+        // Check collisions with square boundaries using config angle and dimensions from constructor
+        this.checkCollisions();
+    }
+
+    /**
+     * Update the ball's trail for visual effect
+     */
+    updateTrail() {
+        // Only add trail points for fast-moving balls
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (speed > 2) {
+            this.trail.push({
+                x: this.x,
+                y: this.y,
+                size: this.size * 0.8,
+                alpha: 0.6
+            });
+
+            // Limit trail length
+            if (this.trail.length > this.maxTrailLength) {
+                this.trail.shift();
+            }
+
+            // Fade trail
+            this.trail.forEach(point => {
+                point.size *= 0.9;
+                point.alpha *= 0.85;
+            });
+        } else if (this.trail.length > 0) {
+            // Fade existing trail when ball slows down
+            this.trail.forEach(point => {
+                point.size *= 0.9;
+                point.alpha *= 0.8;
+            });
+
+            // Remove faded trail points
+            this.trail = this.trail.filter(point => point.alpha > 0.05);
+        }
+    }
+
+    /**
+     * Check and handle collisions with the rotating square
+     */
+    checkCollisions() {
+        // Use dimensions and angle from constructor/config
+        const angle = this.config.angle;
+        const squareSize = Math.min(this.width, this.height) * 0.7;
+        const squareHalfSize = squareSize / 2;
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+
+        // Get ball position relative to square center
+        const relX = this.x - centerX;
+        const relY = this.y - centerY;
+
+        // Rotate ball position to align with square's coordinate system
+        const cosAngle = Math.cos(-angle);
+        const sinAngle = Math.sin(-angle);
+        const rotatedX = relX * cosAngle - relY * sinAngle;
+        const rotatedY = relX * sinAngle + relY * cosAngle;
+
+        // Store original velocities before potential modification
+        const originalVx = this.vx;
+        const originalVy = this.vy;
+        const cosAngleInv = Math.cos(angle);
+        const sinAngleInv = Math.sin(angle);
+
+        // Check if ball is outside square boundaries (adding ball radius)
+        const edgeX = Math.abs(rotatedX) - squareHalfSize + this.size;
+        const edgeY = Math.abs(rotatedY) - squareHalfSize + this.size;
+
+        let collided = false;
+
+        if (edgeX > 0) {
+            // Transform velocity to square's coordinate system
+            const rotatedVx = originalVx * cosAngle - originalVy * sinAngle;
+            const rotatedVy = originalVx * sinAngle + originalVy * cosAngle;
+
+            // Apply bounce in the rotated system with restitution and config bounce
+            const newRotatedVx = -rotatedVx * this.config.bounce * this.restitution;
+
+            // Transform velocity back to world coordinates (using original rotatedVy)
+            this.vx = newRotatedVx * cosAngleInv - rotatedVy * sinAngleInv;
+            this.vy = newRotatedVx * sinAngleInv + rotatedVy * cosAngleInv;
+
+            // Adjust position to prevent sticking (move back along the collision normal in rotated space)
+            const overlapX = edgeX;
+            const correctionX = Math.sign(rotatedX) * overlapX;
+            const adjustedRotatedX = rotatedX - correctionX;
+
+            // Transform corrected position back to world coordinates
+            const adjustedWorld = {
+                x: adjustedRotatedX * cosAngleInv - rotatedY * sinAngleInv + centerX,
+                y: adjustedRotatedX * sinAngleInv + rotatedY * cosAngleInv + centerY
+            };
+            this.x = adjustedWorld.x;
+            this.y = adjustedWorld.y;
+
+
+            // Increase rotation speed when hitting wall
+            this.rotationSpeed += (Math.random() - 0.5) * 0.05;
+
+            collided = true;
+        }
+         // Re-evaluate relative position and velocity for Y check if X collision occurred
+        const currentRelX = this.x - centerX;
+        const currentRelY = this.y - centerY;
+        const currentRotatedX = currentRelX * cosAngle - currentRelY * sinAngle;
+        const currentRotatedY = currentRelX * sinAngle + currentRelY * cosAngle;
+        const currentEdgeY = Math.abs(currentRotatedY) - squareHalfSize + this.size; // Recheck Y edge penetration
+
+        if (currentEdgeY > 0) {
+             // Use current velocities after potential X collision
+             const currentVx = this.vx;
+             const currentVy = this.vy;
+
+            // Transform velocity to square's coordinate system
+            const rotatedVx = currentVx * cosAngle - currentVy * sinAngle;
+            const rotatedVy = currentVx * sinAngle + currentVy * cosAngle;
+
+            // Apply bounce in the rotated system with restitution and config bounce
+            const newRotatedVy = -rotatedVy * this.config.bounce * this.restitution;
+
+            // Transform velocity back to world coordinates (using current rotatedVx)
+            this.vx = rotatedVx * cosAngleInv - newRotatedVy * sinAngleInv;
+            this.vy = rotatedVx * sinAngleInv + newRotatedVy * cosAngleInv;
+
+            // Adjust position to prevent sticking (move back along the collision normal in rotated space)
+            const overlapY = currentEdgeY;
+            const correctionY = Math.sign(currentRotatedY) * overlapY;
+            const adjustedRotatedY = currentRotatedY - correctionY;
+
+            // Transform corrected position back to world coordinates
+             const adjustedWorld = {
+                 x: currentRotatedX * cosAngleInv - adjustedRotatedY * sinAngleInv + centerX,
+                 y: currentRotatedX * sinAngleInv + adjustedRotatedY * cosAngleInv + centerY
+             };
+             this.x = adjustedWorld.x;
+             this.y = adjustedWorld.y;
+
+
+            // Increase rotation speed when hitting wall
+            this.rotationSpeed += (Math.random() - 0.5) * 0.05;
+
+            collided = true;
+        }
+
+        return collided;
+    }
+
+
+    /**
+     * Check collision with another ball
+     * @param {Ball} other - Another ball to check collision with
+     * @returns {boolean} - True if collision occurred
+     */
+    checkBallCollision(other) {
+        // Calculate distance between ball centers
+        const dx = other.x - this.x;
+        const dy = other.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const minDist = this.size + other.size;
+
+        // Check if balls are overlapping
+        if (distance < minDist && distance > 0.01) { // Add distance > 0.01 to avoid division by zero / NaN issues
+            // Calculate collision normal vector (unit vector)
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            // Calculate relative velocity
+            const dvx = this.vx - other.vx;
+            const dvy = this.vy - other.vy;
+
+            // Calculate relative velocity along the normal direction
+            const relativeVelocityNormal = dvx * nx + dvy * ny;
+
+            // Do not resolve if balls are moving apart
+            if (relativeVelocityNormal > 0) return false;
+
+            // Calculate average restitution (or use min/max?)
+            const restitution = (this.restitution + other.restitution) / 2 * this.config.bounce;
+
+            // Calculate impulse scalar (correct formula using mass)
+            const totalInverseMass = 1 / this.mass + 1 / other.mass;
+            let impulseMagnitude = -(1 + restitution) * relativeVelocityNormal / totalInverseMass;
+
+            // Apply impulse to velocities
+            const impulseX = impulseMagnitude * nx;
+            const impulseY = impulseMagnitude * ny;
+
+            this.vx += impulseX / this.mass;
+            this.vy += impulseY / this.mass;
+            other.vx -= impulseX / other.mass;
+            other.vy -= impulseY / other.mass;
+
+            // Move balls apart to prevent sticking (positional correction)
+            const overlap = minDist - distance;
+            const correctionRatio1 = (1 / this.mass) / totalInverseMass;
+            const correctionRatio2 = (1 / other.mass) / totalInverseMass;
+
+            this.x -= overlap * nx * correctionRatio1;
+            this.y -= overlap * ny * correctionRatio1;
+            other.x += overlap * nx * correctionRatio2;
+            other.y += overlap * ny * correctionRatio2;
+
+
+            // Change rotation on collision (optional effect)
+            this.rotationSpeed += (Math.random() - 0.5) * 0.1;
+            other.rotationSpeed += (Math.random() - 0.5) * 0.1;
+
+            return true;
+        } else if (distance <= 0.01) {
+            // Handle perfectly overlapping balls - nudge them apart slightly
+             this.x += (Math.random() - 0.5) * 0.1;
+             this.y += (Math.random() - 0.5) * 0.1;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Draw the ball on the canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+     */
+    draw(ctx) {
+        // Draw trail if it exists
+        this.drawTrail(ctx);
+
+        // Draw shadow for 3D effect
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        // Use ellipse for a slightly skewed shadow
+        ctx.ellipse(
+            this.x + this.shadowOffset,
+            this.y + this.shadowOffset,
+            this.size, // x radius
+            this.size * 0.9, // y radius (slightly squashed)
+            0, // rotation
+            0, // start angle
+            Math.PI * 2 // end angle
+        );
+        ctx.fill();
+        ctx.closePath();
+
+
+        // Save context before drawing rotated elements
+        ctx.save();
+        ctx.translate(this.x, this.y); // Translate to ball center for rotation/pattern drawing
+
+        // Draw main ball body (no translation needed here as arc center is already at x,y)
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2); // Draw centered at (0,0) after translate
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+
+        // Draw pattern on ball if enabled (rotation is applied here)
+        if (this.pattern) {
+             ctx.rotate(this.rotation); // Apply rotation for pattern
+             this.drawPattern(ctx); // Pattern is drawn relative to (0,0)
+             ctx.rotate(-this.rotation); // Rotate back if needed, or rely on restore
+        }
+
+        // Add highlight for 3D effect (drawn relative to 0,0)
+        this.drawHighlight(ctx);
+
+        // Restore context to remove translation/rotation
+        ctx.restore();
+    }
+
+
+    /**
+     * Draw the ball's trail
+     * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+     */
+    drawTrail(ctx) {
+        // Draw trail points in reverse order so newest points appear on top
+        for (let i = this.trail.length - 1; i >= 0; i--) {
+            const point = this.trail[i];
+            if (point.alpha > 0.01 && point.size > 0.1) { // Only draw visible points
+                 ctx.beginPath();
+                 ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
+                 // Ensure color format is rgba compatible
+                 let baseColor = this.color;
+                 if (baseColor.startsWith('#')) {
+                      const r = parseInt(baseColor.slice(1, 3), 16);
+                      const g = parseInt(baseColor.slice(3, 5), 16);
+                      const b = parseInt(baseColor.slice(5, 7), 16);
+                      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${point.alpha})`;
+                 } else if (baseColor.startsWith('hsl')) {
+                      // Assuming HSL format like hsl(H, S%, L%)
+                      ctx.fillStyle = baseColor.replace('hsl', 'hsla').replace(')', `, ${point.alpha})`);
+                 } else {
+                      // Fallback for unknown color formats
+                       ctx.fillStyle = `rgba(200, 200, 200, ${point.alpha})`;
+                 }
+                 ctx.fill();
+                 ctx.closePath();
+            }
+        }
+    }
+
+    /**
+     * Draw pattern on the ball
+     * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+     */
+    drawPattern(ctx) {
+        // Assumes context is already translated to ball center and rotated
+        ctx.fillStyle = this.patternColor;
+        ctx.beginPath(); // Start path for pattern
+
+        switch (this.patternType) {
+            case 0: // Stripes
+                 const stripeWidth = this.size / 3;
+                 const halfStripe = stripeWidth / 2;
+                 for (let i = -this.size; i < this.size; i += stripeWidth) {
+                      // Use arc clipping to keep pattern within the ball circle
+                      ctx.save();
+                      ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                      ctx.clip();
+                      // Draw rectangle for stripe
+                      ctx.rect(i - halfStripe, -this.size, stripeWidth, this.size * 2);
+                      ctx.restore();
+                 }
+                break;
+            case 1: // Circles
+                for (let i = 0; i < 3; i++) {
+                    const angle = (i / 3) * Math.PI * 2;
+                    const pX = Math.cos(angle) * this.size * 0.5;
+                    const pY = Math.sin(angle) * this.size * 0.5;
+
+                    // Draw sub-circle
+                    ctx.moveTo(pX + this.size * 0.25, pY); // Need moveTo before arc for separate circles
+                    ctx.arc(pX, pY, this.size * 0.25, 0, Math.PI * 2);
+                }
+                break;
+            case 2: // Spiral
+                const spiralPoints = 32;
+                const maxRadius = this.size * 0.9;
+                const dotSize = this.size * 0.08;
+                for (let i = 0; i < spiralPoints; i++) {
+                     const angle = (i / spiralPoints) * Math.PI * 4; // Two full rotations
+                     const radius = (i / spiralPoints) * maxRadius;
+                     const pX = Math.cos(angle) * radius;
+                     const pY = Math.sin(angle) * radius;
+
+                     // Draw dot
+                     ctx.moveTo(pX + dotSize, pY); // Need moveTo before arc
+                     ctx.arc(pX, pY, dotSize, 0, Math.PI * 2);
+                }
+                break;
+        }
+        // Fill the combined path for the pattern
+        ctx.fill();
+        ctx.closePath(); // Close path after drawing all parts
+    }
+
+
+    /**
+     * Draw highlight for 3D effect
+     * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+     */
+    drawHighlight(ctx) {
+        // Assumes context is translated to ball center (0,0)
+        // Add highlight
+        const gradient = ctx.createRadialGradient(
+            -this.size * 0.3, // Highlight offset relative to center
+            -this.size * 0.3,
+            0,                // Inner radius
+            0,                // Gradient center x (relative to ball center)
+            0,                // Gradient center y
+            this.size          // Outer radius
+        );
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)'); // Brighter start
+        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.2)'); // Faster falloff
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   // Fully transparent end
+
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    /**
+     * Apply force to the ball
+     * @param {number} forceX - X component of force
+     * @param {number} forceY - Y component of force
+     */
+    applyForce(forceX, forceY) {
+        // F = ma => a = F/m. Change in velocity (dv) = a * dt. Assume dt=1 for simplicity here.
+        // Check if mass is valid to prevent division by zero
+        if (this.mass > 0) {
+            this.vx += forceX / this.mass;
+            this.vy += forceY / this.mass;
+        }
+    }
+
+    /**
+     * Calculate the ball's kinetic energy
+     * @returns {number} - Kinetic energy value
+     */
+    getKineticEnergy() {
+        const velocity = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        return 0.5 * this.mass * velocity * velocity;
+    }
+
+    /**
+     * Create a collision effect (currently unused, logic moved to Renderer)
+     * @param {CanvasRenderingContext2D} ctx - Canvas 2D context
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     */
+    createCollisionEffect(ctx, x, y) {
+        // This logic might be better placed in the Renderer or called from Physics engine
+        // console.log("Collision effect at", x, y); // Placeholder if needed
+    }
+}
+
+// Export the Ball class for module systems or window global
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = Ball;
+} else {
+    window.Ball = Ball;
+}
+--- FIX_END ---
+--- FIX_START physics.js ---
+// physics.js - Implements gravity, collision detection and response algorithms
+
+/**
+ * Physics engine for handling ball physics in rotating square environment
+ * Note: Much of this logic might be duplicated or better handled within Ball/Container classes
+ * depending on the chosen architecture. This version assumes it might be used for specific tasks.
+ */
+class Physics {
+    /**
+     * Create a new physics engine
+     */
+    constructor() {
+        // Pre-calculate some constants for optimization
+        this.twoPi = Math.PI * 2;
+    }
+
+    /**
+     * Apply gravity to a ball
+     * @param {Object} ball - The ball to apply gravity to (should have vy property)
+     * @param {number} gravity - Gravity strength
+     */
+    applyGravity(ball, gravity) {
+        if (ball && typeof ball.vy === 'number') {
+            ball.vy += gravity;
+        }
+    }
+
+    /**
+     * Apply friction to a ball's velocity
+     * @param {Object} ball - The ball to apply friction to (should have vx, vy)
+     * @param {number} friction - Friction coefficient (0-1)
+     */
+    applyFriction(ball, friction) {
+        if (ball && typeof ball.vx === 'number' && typeof ball.vy === 'number') {
+            ball.vx *= friction;
+            ball.vy *= friction;
+        }
+    }
+
+    /**
+     * Move a ball based on its velocity
+     * @param {Object} ball - The ball to move (should have x, y, vx, vy)
+     */
+    moveBall(ball) {
+        if (ball && typeof ball.x === 'number' && typeof ball.y === 'number' && typeof ball.vx === 'number' && typeof ball.vy === 'number') {
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+        }
+    }
+
+    /**
+     * Check and handle collision between a ball and rotating square
+     * NOTE: This duplicates logic likely present in Ball or Container. Use with caution.
+     * Uses ball.size instead of ball.radius for consistency.
+     * @param {Object} ball - The ball to check for collisions (needs x, y, vx, vy, size)
+     * @param {number} angle - Rotation angle of the square
+     * @param {Object} dimensions - Canvas dimensions { width, height }
+     * @param {number} bounce - Bounce coefficient (0-1)
+     * @param {number} restitution - Ball's own restitution factor (optional)
+     * @returns {boolean} - True if collision occurred
+     */
+    checkSquareCollision(ball, angle, dimensions, bounce, restitution = 1.0) {
+        if (!ball || !dimensions) return false;
+        const { width, height } = dimensions;
+        const squareSize = Math.min(width, height) * 0.7;
+        const squareHalfSize = squareSize / 2;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // Ensure ball has required properties
+        if (typeof ball.x !== 'number' || typeof ball.y !== 'number' || typeof ball.vx !== 'number' || typeof ball.vy !== 'number' || typeof ball.size !== 'number') {
+            console.error("Ball object missing required properties for collision check.");
+            return false;
+        }
+
+        // Get ball position relative to square center
+        const relX = ball.x - centerX;
+        const relY = ball.y - centerY;
+
+        // Rotate ball position to align with square's coordinate system
+        const cosAngle = Math.cos(-angle);
+        const sinAngle = Math.sin(-angle);
+        const rotatedX = relX * cosAngle - relY * sinAngle;
+        const rotatedY = relX * sinAngle + relY * cosAngle;
+
+        // Store original velocities before potential modification
+        const originalVx = ball.vx;
+        const originalVy = ball.vy;
+        const cosAngleInv = Math.cos(angle);
+        const sinAngleInv = Math.sin(angle);
+
+
+        // Check if ball is outside square boundaries (using ball.size)
+        const edgeX = Math.abs(rotatedX) - squareHalfSize + ball.size;
+        const edgeY = Math.abs(rotatedY) - squareHalfSize + ball.size;
+
+        let collided = false;
+
+        if (edgeX > 0) {
+            // Transform velocity to square's coordinate system
+            const rotatedVx = originalVx * cosAngle - originalVy * sinAngle;
+            const rotatedVy = originalVx * sinAngle + originalVy * cosAngle;
+
+            // Apply bounce in the rotated system
+            const newRotatedVx = -rotatedVx * bounce * restitution;
+
+            // Transform velocity back to world coordinates
+            ball.vx = newRotatedVx * cosAngleInv - rotatedVy * sinAngleInv;
+            ball.vy = newRotatedVx * sinAngleInv + rotatedVy * cosAngleInv;
+
+            // Adjust position to prevent sticking
+            const overlapX = edgeX;
+            const correctionX = Math.sign(rotatedX) * overlapX;
+            const adjustedRotatedX = rotatedX - correctionX;
+
+            // Transform corrected position back to world coordinates
+            const adjustedWorld = {
+                x: adjustedRotatedX * cosAngleInv - rotatedY * sinAngleInv + centerX,
+                y: adjustedRotatedX * sinAngleInv + rotatedY * cosAngleInv + centerY
+            };
+            ball.x = adjustedWorld.x;
+            ball.y = adjustedWorld.y;
+
+            collided = true;
+        }
+
+        // Re-evaluate relative position and velocity for Y check if X collision occurred
+        const currentRelX = ball.x - centerX;
+        const currentRelY = ball.y - centerY;
+        const currentRotatedX = currentRelX * cosAngle - currentRelY * sinAngle;
+        const currentRotatedY = currentRelX * sinAngle + currentRelY * cosAngle;
+        const currentEdgeY = Math.abs(currentRotatedY) - squareHalfSize + ball.size;
+
+        if (currentEdgeY > 0) {
+             // Use current velocities after potential X collision
+             const currentVx = ball.vx;
+             const currentVy = ball.vy;
+
+            // Transform velocity to square's coordinate system
+            const rotatedVx = currentVx * cosAngle - currentVy * sinAngle;
+            const rotatedVy = currentVx * sinAngle + currentVy * cosAngle;
+
+            // Apply bounce in the rotated system
+            const newRotatedVy = -rotatedVy * bounce * restitution;
+
+            // Transform velocity back to world coordinates
+            ball.vx = rotatedVx * cosAngleInv - newRotatedVy * sinAngleInv;
+            ball.vy = rotatedVx * sinAngleInv + newRotatedVy * cosAngleInv;
+
+            // Adjust position to prevent sticking
+            const overlapY = currentEdgeY;
+            const correctionY = Math.sign(currentRotatedY) * overlapY;
+            const adjustedRotatedY = currentRotatedY - correctionY;
+
+             // Transform corrected position back to world coordinates
+              const adjustedWorld = {
+                  x: currentRotatedX * cosAngleInv - adjustedRotatedY * sinAngleInv + centerX,
+                  y: currentRotatedX * sinAngleInv + adjustedRotatedY * cosAngleInv + centerY
+              };
+              ball.x = adjustedWorld.x;
+              ball.y = adjustedWorld.y;
+
+            collided = true;
+        }
+
+        return collided;
+    }
+
+
+    /**
+     * Check and handle collision between two balls
+     * NOTE: Duplicates logic potentially in Ball class. Ensure consistency.
+     * Uses ball.size and ball.mass.
+     * @param {Object} ball1 - First ball (needs x, y, vx, vy, size, mass, restitution)
+     * @param {Object} ball2 - Second ball (needs x, y, vx, vy, size, mass, restitution)
+     * @param {number} bounce - Global bounce coefficient (can be combined with restitution)
+     * @returns {boolean} - True if collision occurred
+     */
+    checkBallCollision(ball1, ball2, bounce) {
+         // Ensure balls and properties exist
+         if (!ball1 || !ball2 ||
+             typeof ball1.x !== 'number' || typeof ball1.y !== 'number' || typeof ball1.vx !== 'number' || typeof ball1.vy !== 'number' || typeof ball1.size !== 'number' || typeof ball1.mass !== 'number' || typeof ball1.restitution !== 'number' ||
+             typeof ball2.x !== 'number' || typeof ball2.y !== 'number' || typeof ball2.vx !== 'number' || typeof ball2.vy !== 'number' || typeof ball2.size !== 'number' || typeof ball2.mass !== 'number' || typeof ball2.restitution !== 'number') {
+             console.error("Ball objects missing required properties for ball-ball collision check.");
+             return false;
+         }
+
+        // Calculate distance between ball centers
+        const dx = ball2.x - ball1.x;
+        const dy = ball2.y - ball1.y;
+        const distanceSquared = dx * dx + dy * dy; // Use squared distance first
+        const minDist = ball1.size + ball2.size;
+        const minDistSquared = minDist * minDist;
+
+        // Check if balls are overlapping
+        if (distanceSquared < minDistSquared && distanceSquared > 1e-6) { // Avoid overlap and zero distance
+            const distance = Math.sqrt(distanceSquared);
+             // Calculate collision normal vector (unit vector)
+             const nx = dx / distance;
+             const ny = dy / distance;
+
+             // Calculate relative velocity
+             const dvx = ball1.vx - ball2.vx;
+             const dvy = ball1.vy - ball2.vy;
+
+             // Calculate relative velocity along the normal direction
+             const relativeVelocityNormal = dvx * nx + dvy * ny;
+
+             // Do not resolve if balls are moving apart
+             if (relativeVelocityNormal > 0) return false;
+
+             // Calculate combined restitution
+             const restitution = (ball1.restitution + ball2.restitution) / 2 * bounce;
+
+             // Ensure masses are positive to avoid division by zero
+             if (ball1.mass <= 0 || ball2.mass <= 0) {
+                 console.warn("Ball mass is zero or negative, skipping collision resolution.");
+                 return false;
+             }
+             const totalInverseMass = 1 / ball1.mass + 1 / ball2.mass;
+
+             // Calculate impulse scalar
+             let impulseMagnitude = -(1 + restitution) * relativeVelocityNormal / totalInverseMass;
+
+             // Apply impulse to velocities
+             const impulseX = impulseMagnitude * nx;
+             const impulseY = impulseMagnitude * ny;
+
+             ball1.vx += impulseX / ball1.mass;
+             ball1.vy += impulseY / ball1.mass;
+             ball2.vx -= impulseX / ball2.mass;
+             ball2.vy -= impulseY / ball2.mass;
+
+             // Move balls apart to prevent sticking (positional correction)
+             const overlap = minDist - distance;
+             const correctionRatio1 = (1 / ball1.mass) / totalInverseMass;
+             const correctionRatio2 = (1 / ball2.mass) / totalInverseMass;
+
+             ball1.x -= overlap * nx * correctionRatio1;
+             ball1.y -= overlap * ny * correctionRatio1;
+             ball2.x += overlap * nx * correctionRatio2;
+             ball2.y += overlap * ny * correctionRatio2;
+
+            return true;
+         } else if (distanceSquared <= 1e-6) {
+             // Handle perfectly overlapping balls - nudge them apart slightly
+              ball1.x += (Math.random() - 0.5) * 0.1;
+              ball1.y += (Math.random() - 0.5) * 0.1;
+         }
+
+
+        return false;
+    }
+
+
+    /**
+     * Update physics for a single ball (combines gravity, friction, movement, square collision)
+     * @param {Object} ball - The ball to update
+     * @param {Object} config - Physics configuration (gravity, friction, angle, bounce)
+     * @param {Object} dimensions - Canvas dimensions { width, height }
+     * @returns {boolean} - True if collision with square occurred
+     */
+    updateBall(ball, config, dimensions) {
+        if (!ball || !config || !dimensions) return false;
+
+        // Apply gravity
+        this.applyGravity(ball, config.gravity);
+
+        // Apply friction
+        this.applyFriction(ball, config.friction);
+
+        // Move ball
+        this.moveBall(ball);
+
+        // Check for collision with square (using ball's restitution if available)
+        const restitution = typeof ball.restitution === 'number' ? ball.restitution : 1.0;
+        return this.checkSquareCollision(ball, config.angle, dimensions, config.bounce, restitution);
+    }
+
+
+    /**
+     * Handle collisions between all balls in an array
+     * @param {Array} balls - Array of all ball objects
+     * @param {number} bounce - Global bounce coefficient
+     * @returns {Array} - Array of pairs of indices that collided [[i, j], ...]
+     */
+    handleBallCollisions(balls, bounce) {
+        const collisions = [];
+        if (!balls) return collisions;
+
+        // Check all possible ball pairs for collisions
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                if (this.checkBallCollision(balls[i], balls[j], bounce)) {
+                    collisions.push([i, j]);
+                }
+            }
+        }
+
+        return collisions;
+    }
+
+
+    /**
+     * Calculate kinetic energy of the system
+     * @param {Array} balls - Array of all balls (need vx, vy, mass)
+     * @returns {number} - Total kinetic energy
+     */
+    calculateSystemEnergy(balls) {
+        let energy = 0;
+        if (!balls) return energy;
+
+        for (const ball of balls) {
+             if (ball && typeof ball.vx === 'number' && typeof ball.vy === 'number' && typeof ball.mass === 'number' && ball.mass > 0) {
+                  const velocitySquared = ball.vx * ball.vx + ball.vy * ball.vy;
+                  // KE = 0.5 * m * v^2
+                  energy += 0.5 * ball.mass * velocitySquared;
+             }
+        }
+
+        return energy;
+    }
+
+
+    /**
+     * Apply velocity damping to simulate air resistance (Optional)
+     * @param {Object} ball - The ball to apply air resistance to (needs vx, vy)
+     * @param {number} damping - Damping factor (e.g., 0.001)
+     */
+    applyAirResistance(ball, damping) {
+        if (!ball || typeof ball.vx !== 'number' || typeof ball.vy !== 'number') return;
+
+        const speedSquared = ball.vx * ball.vx + ball.vy * ball.vy;
+        const speed = Math.sqrt(speedSquared);
+
+        // Air resistance increases with velocity squared, acts opposite to velocity
+        if (speed > 0.01) { // Only apply if moving significantly
+            const dragForceMagnitude = damping * speedSquared;
+            const dragForceX = -ball.vx * (dragForceMagnitude / speed);
+            const dragForceY = -ball.vy * (dragForceMagnitude / speed);
+
+            // Apply drag force (assuming mass = 1 or incorporated into damping factor for simplicity)
+            // a = F/m -> dv = F/m * dt. If dt=1, dv = F/m.
+            // For simplicity, let's assume dv = F * damping_factor (where damping includes mass effect)
+             // Check if mass is available
+             if (typeof ball.mass === 'number' && ball.mass > 0) {
+                  ball.vx += dragForceX / ball.mass;
+                  ball.vy += dragForceY / ball.mass;
+             } else {
+                  // Fallback if mass is not available (less accurate)
+                  ball.vx += dragForceX * 0.1; // Arbitrary factor
+                  ball.vy += dragForceY * 0.1;
+             }
+
+        }
+    }
+
+
+    /**
+     * Apply a force field (attraction/repulsion) to balls (Optional)
+     * @param {Array} balls - Array of all balls (needs x, y, vx, vy, mass)
+     * @param {Object} point - Point coordinates {x, y} of the force field center
+     * @param {number} strength - Force strength (positive attracts, negative repels)
+     * @param {number} radius - Radius of effect
+     */
+    applyForceField(balls, point, strength, radius) {
+        if (!balls || !point || typeof point.x !== 'number' || typeof point.y !== 'number') return;
+        const radiusSquared = radius * radius;
+
+        for (const ball of balls) {
+             if (!ball || typeof ball.x !== 'number' || typeof ball.y !== 'number' || typeof ball.vx !== 'number' || typeof ball.vy !== 'number' || typeof ball.mass !== 'number' || ball.mass <= 0) {
+                  continue; // Skip invalid balls
+             }
+
+            const dx = point.x - ball.x;
+            const dy = point.y - ball.y;
+            const distanceSquared = dx * dx + dy * dy;
+
+            if (distanceSquared < radiusSquared && distanceSquared > 1e-6) { // Within radius and not exactly at center
+                const distance = Math.sqrt(distanceSquared);
+                // Force decreases with distance (e.g., 1/d or 1/d^2)
+                // Let's use F = strength / distance for simplicity
+                const forceMagnitude = strength / distance;
+
+                // Calculate force components
+                const forceX = (dx / distance) * forceMagnitude;
+                const forceY = (dy / distance) * forceMagnitude;
+
+                // Apply force: a = F/m -> dv = (F/m) * dt. Assume dt=1.
+                ball.vx += forceX / ball.mass;
+                ball.vy += forceY / ball.mass;
+            } else if (distanceSquared <= 1e-6 && strength < 0) {
+                 // If exactly at center and repulsive, push away randomly
+                 ball.vx += (Math.random() - 0.5) * Math.abs(strength) * 0.1 / ball.mass;
+                 ball.vy += (Math.random() - 0.5) * Math.abs(strength) * 0.1 / ball.mass;
+            }
+        }
+    }
+
+}
+
+// Export the Physics engine class
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = Physics;
+} else {
+    window.Physics = Physics;
+}
+--- FIX_END ---
+--- FIX_START README.md ---
+# RotationBalls
+
+## Overview
+RotationBalls is an interactive web animation that features a rotating square container filled with colorful balls of varying sizes. The balls respond to gravity and collide with the container walls and each other as the container rotates. This project is built with vanilla JavaScript, with no external dependencies or libraries required.
+
+## Features
+- Dynamic rotating container with adjustable speed
+- Physics-based ball movement with gravity and friction effects
+- Realistic collision detection and response between balls and container walls
+- Balls of varying sizes, colors, and masses
+- Interactive force fields (click/touch and drag on canvas to attract/repel balls)
+- Responsive design that adapts to different screen sizes
+- Customizable parameters via UI controls (rotation speed, color, ball count, ball size, gravity, bounce, friction)
+- Visual effects like ball trails, patterns, highlights, and shadows
+- Keyboard shortcuts for common actions
+
+## Installation
+
+### Quick Setup
+1. Clone the repository or download the source files.
+2. No build process or dependencies to install.
+3. Open `index.html` in any modern web browser.
+
+```bash
+# If using git
+git clone https://github.com/yourusername/rotationballs.git
+cd rotationballs
+# Then open index.html in your browser
+```
+*(Note: Replace `yourusername` with the actual repository path if applicable)*
+
+## Usage
+
+- **Adjust Parameters**: Use the sliders and input fields in the control panel below the canvas to change simulation parameters like rotation speed, gravity, number of balls, etc.
+- **Reset Balls**: Click the "Reset Balls" button or press the `Space` key to generate a new set of balls based on the current settings.
+- **Interactive Forces**:
+    - **Left-Click and Drag** on the canvas to create an attractive force field that pulls balls towards your cursor.
+    - **Right-Click and Drag** on the canvas to create a repulsive force field that pushes balls away from your cursor.
+    - **Touch and Drag** on touch-enabled devices to create an attractive force field.
+- **Keyboard Shortcuts**:
+    - `Space`: Reset balls.
+    - `R`: Reverse gravity direction.
+    - `G`: Toggle gravity on/off (sets gravity to 0 or restores previous value).
+    - `S`: Stop container rotation (sets rotation speed to 0).
+
+## Project Structure
+
+```
+rotationballs/
+│
+├── index.html         # Main HTML document (includes embedded CSS)
+├── app.js             # Main application logic, simulation loop, component coordination
+├── ball.js            # Ball class definition (properties, update, collision, drawing)
+├── container.js       # Container class for the rotating square (properties, transformations, drawing)
+├── input.js           # Handles UI controls, mouse/touch interaction, keyboard shortcuts
+├── physics.js         # Contains physics helper functions (gravity, friction, collisions - some overlap with other classes)
+├── renderer.js        # Handles drawing operations (square, balls, effects - some overlap/unused)
+├── utils.js           # Utility functions for math, vectors, colors, etc.
+└── favicon.ico        # Website favicon (binary file)
+```
+
+### File Descriptions
+
+- **index.html**: The main HTML file that sets up the canvas element, UI controls, and loads the JavaScript files. Contains embedded CSS styles.
+- **app.js**: The main application script that initializes the simulation, manages the animation loop, and coordinates interactions between different components (Container, Balls, InputManager).
+- **ball.js**: Defines the `Ball` class, including its physical properties (position, velocity, mass, size, color, restitution), update logic (movement, gravity, friction), collision detection/response (ball-square and ball-ball), and drawing methods (including patterns, trails, highlights).
+- **container.js**: Defines the `Container` class representing the rotating square. Manages its state (size, position, angle), provides coordinate transformation methods, and includes drawing logic for the square itself.
+- **input.js**: Defines the `InputManager` class, responsible for handling all user input: binding UI controls (sliders, buttons) to the configuration, processing mouse and touch events on the canvas for interactive forces, and managing keyboard shortcuts.
+- **physics.js**: Provides a collection of physics-related functions, such as applying gravity and friction, and performing collision detection (ball-square, ball-ball). Note: Some logic here might overlap with methods within the `Ball` and `Container` classes.
+- **renderer.js**: Defines a `Renderer` class intended for drawing elements onto the canvas. Note: In the current structure, much of the drawing is handled directly by the `Ball` and `Container` classes' own `draw` methods.
+- **utils.js**: Contains various utility classes and functions for common tasks like vector math (`Vector2D`), rotation calculations (`RotationUtils`), color manipulation (`ColorUtils`), general math helpers (`MathUtils`), and potentially collision/animation/DOM utilities (though not all may be actively used).
+
+## Browser Compatibility
+
+RotationBalls works on all modern browsers that support HTML5 Canvas and ES6 JavaScript:
+- Chrome (recommended)
+- Firefox
+- Safari
+- Edge
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Acknowledgments
+
+This project serves as a demonstration of physics-based animations and component interaction using vanilla JavaScript, without relying on external libraries.
+--- FIX_END ---
+--- FIX_START utils.js ---
+// utils.js - Utility functions for vector calculations, rotations, and other helpers
+
+/**
+ * Vector utilities for 2D calculations
+ */
+class Vector2D {
+    /**
+     * Create a new 2D vector
+     * @param {number} x - X component
+     * @param {number} y - Y component
+     */
+    constructor(x = 0, y = 0) {
+        this.x = x;
+        this.y = y;
+    }
+
+    /**
+     * Get the length (magnitude) of the vector
+     * @returns {number} Vector length
+     */
+    length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    /**
+     * Normalize the vector to a unit vector
+     * @returns {Vector2D} New normalized vector
+     */
+    normalize() {
+        const len = this.length();
+        if (len === 0) return new Vector2D(0, 0);
+        return new Vector2D(this.x / len, this.y / len);
+    }
+
+    /**
+     * Add another vector to this one
+     * @param {Vector2D} v - Vector to add
+     * @returns {Vector2D} New vector with sum
+     */
+    add(v) {
+        return new Vector2D(this.x + v.x, this.y + v.y);
+    }
+
+    /**
+     * Subtract another vector from this one
+     * @param {Vector2D} v - Vector to subtract
+     * @returns {Vector2D} New vector with difference
+     */
+    subtract(v) {
+        return new Vector2D(this.x - v.x, this.y - v.y);
+    }
+
+    /**
+     * Multiply vector by a scalar
+     * @param {number} scalar - Scalar value
+     * @returns {Vector2D} New scaled vector
+     */
+    multiply(scalar) {
+        return new Vector2D(this.x * scalar, this.y * scalar);
+    }
+
+    /**
+     * Calculate dot product with another vector
+     * @param {Vector2D} v - The other vector
+     * @returns {number} Dot product
+     */
+    dot(v) {
+        return this.x * v.x + this.y * v.y;
+    }
+
+    /**
+     * Rotate vector by angle
+     * @param {number} angle - Angle in radians
+     * @returns {Vector2D} New rotated vector
+     */
+    rotate(angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return new Vector2D(
+            this.x * cos - this.y * sin,
+            this.x * sin + this.y * cos
+        );
+    }
+
+    /**
+     * Get distance to another vector
+     * @param {Vector2D} v - The other vector
+     * @returns {number} Distance between vectors
+     */
+    distanceTo(v) {
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Create a copy of this vector
+     * @returns {Vector2D} New identical vector
+     */
+    clone() {
+        return new Vector2D(this.x, this.y);
+    }
+}
+
+/**
+ * Class containing rotation-related utility functions
+ */
+class RotationUtils {
+    /**
+     * Convert degrees to radians
+     * @param {number} degrees - Angle in degrees
+     * @returns {number} Angle in radians
+     */
+    static degreesToRadians(degrees) {
+        return degrees * Math.PI / 180;
+    }
+
+    /**
+     * Convert radians to degrees
+     * @param {number} radians - Angle in radians
+     * @returns {number} Angle in degrees
+     */
+    static radiansToDegrees(radians) {
+        return radians * 180 / Math.PI;
+    }
+
+    /**
+     * Rotate a point around an origin
+     * @param {Object} point - Point {x, y} to rotate
+     * @param {Object} origin - Origin {x, y} to rotate around
+     * @param {number} angle - Angle in radians
+     * @returns {Object} Rotated point {x, y}
+     */
+    static rotatePointAround(point, origin, angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        // Translate point to origin
+        const translatedX = point.x - origin.x;
+        const translatedY = point.y - origin.y;
+
+        // Rotate point
+        const rotatedX = translatedX * cos - translatedY * sin;
+        const rotatedY = translatedX * sin + translatedY * cos;
+
+        // Translate point back
+        return {
+            x: rotatedX + origin.x,
+            y: rotatedY + origin.y
+        };
+    }
+
+    /**
+     * Get angle between two points
+     * @param {Object} p1 - First point {x, y}
+     * @param {Object} p2 - Second point {x, y}
+     * @returns {number} Angle in radians
+     */
+    static angleBetween(p1, p2) {
+        return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    }
+}
+
+/**
+ * Utilities for color manipulation
+ */
+class ColorUtils {
+    /**
+     * Convert hex color to RGB components
+     * @param {string} hex - Hex color string (with or without #)
+     * @returns {Object|null} RGB components {r, g, b} or null if invalid hex
+     */
+    static hexToRgb(hex) {
+         if (!hex || typeof hex !== 'string') return null;
+        // Remove # if present
+        hex = hex.replace(/^#/, '');
+
+        // Check for valid hex length
+        if (hex.length !== 3 && hex.length !== 6) return null;
+
+        // Expand shorthand hex (e.g., "03F" -> "0033FF")
+        if (hex.length === 3) {
+             hex = hex.split('').map(char => char + char).join('');
+        }
+
+        // Parse the components
+        const bigint = parseInt(hex, 16);
+        // Check if parsing was successful (not NaN)
+        if (isNaN(bigint)) return null;
+
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+
+        return { r, g, b };
+    }
+
+    /**
+     * Convert RGB components to hex color
+     * @param {number} r - Red component (0-255)
+     * @param {number} g - Green component (0-255)
+     * @param {number} b - Blue component (0-255)
+     * @returns {string} Hex color string with #
+     */
+    static rgbToHex(r, g, b) {
+         // Clamp values to 0-255 and ensure they are integers
+         r = Math.max(0, Math.min(255, Math.round(r)));
+         g = Math.max(0, Math.min(255, Math.round(g)));
+         b = Math.max(0, Math.min(255, Math.round(b)));
+
+         // Convert each component to a 2-digit hex string
+         const rHex = r.toString(16).padStart(2, '0');
+         const gHex = g.toString(16).padStart(2, '0');
+         const bHex = b.toString(16).padStart(2, '0');
+
+        return `#${rHex}${gHex}${bHex}`;
+    }
+
+    /**
+     * Convert hex color to rgba string
+     * @param {string} hex - Hex color string
+     * @param {number} alpha - Alpha value (0-1)
+     * @returns {string|null} RGBA color string or null if hex is invalid
+     */
+    static hexToRgba(hex, alpha = 1) {
+        const rgb = this.hexToRgb(hex);
+        if (!rgb) return null; // Return null if hex was invalid
+        // Clamp alpha
+        alpha = Math.max(0, Math.min(1, alpha));
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    }
+
+    /**
+     * Convert HSL values to RGB
+     * @param {number} h - Hue (0-360)
+     * @param {number} s - Saturation (0-100)
+     * @param {number} l - Lightness (0-100)
+     * @returns {Object} RGB components {r, g, b}
+     */
+    static hslToRgb(h, s, l) {
+        // Clamp and normalize inputs
+        h = (h % 360 + 360) % 360; // Ensure h is in [0, 360)
+        s = Math.max(0, Math.min(100, s)) / 100;
+        l = Math.max(0, Math.min(100, l)) / 100;
+
+        let r, g, b;
+
+        if (s === 0) {
+            r = g = b = l; // achromatic
+        } else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            const hNormalized = h / 360;
+
+            r = hue2rgb(p, q, hNormalized + 1/3);
+            g = hue2rgb(p, q, hNormalized);
+            b = hue2rgb(p, q, hNormalized - 1/3);
+        }
+
+        return {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255)
+        };
+    }
+
+    /**
+     * Generate a random color
+     * @param {boolean} asHex - Whether to return as hex
+     * @returns {string} Random color as hex or hsl
+     */
+    static randomColor(asHex = false) {
+        if (asHex) {
+            // Ensure 6 digits with padStart
+            return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+        } else {
+            // Generate random HSL values within reasonable ranges
+            const h = Math.random() * 360;
+            const s = MathUtils.randomFloat(60, 80); // Saturation between 60% and 80%
+            const l = MathUtils.randomFloat(50, 70); // Lightness between 50% and 70%
+            return `hsl(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`;
+        }
+    }
+
+    /**
+     * Adjust the brightness of a color
+     * @param {string} color - Hex color string
+     * @param {number} percent - Percent to adjust (-100 to 100)
+     * @returns {string|null} Adjusted hex color string or null if input color invalid
+     */
+    static adjustBrightness(color, percent) {
+        const rgb = this.hexToRgb(color);
+        if (!rgb) return null; // Return null if hex was invalid
+
+        const { r, g, b } = rgb;
+        const factor = percent / 100;
+
+        // Adjust each component, clamping between 0 and 255
+        const adjustedR = Math.max(0, Math.min(255, r + factor * 255));
+        const adjustedG = Math.max(0, Math.min(255, g + factor * 255));
+        const adjustedB = Math.max(0, Math.min(255, b + factor * 255));
+
+        return this.rgbToHex(adjustedR, adjustedG, adjustedB);
+    }
+}
+
+/**
+ * Math utilities specific to the balls and physics simulation
+ */
+class MathUtils {
+    /**
+     * Clamp a value between min and max
+     * @param {number} value - Value to clamp
+     * @param {number} min - Minimum value
+     * @param {number} max - Maximum value
+     * @returns {number} Clamped value
+     */
+    static clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Linear interpolation between two values
+     * @param {number} a - First value
+     * @param {number} b - Second value
+     * @param {number} t - Interpolation factor (0-1)
+     * @returns {number} Interpolated value
+     */
+    static lerp(a, b, t) {
+        // Clamp t to [0, 1]
+        t = Math.max(0, Math.min(1, t));
+        return a + (b - a) * t;
+    }
+
+    /**
+     * Generate a random float between min and max (inclusive of min, exclusive of max)
+     * @param {number} min - Minimum value
+     * @param {number} max - Maximum value
+     * @returns {number} Random value
+     */
+    static randomFloat(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    /**
+     * Generate a random integer between min and max (inclusive)
+     * @param {number} min - Minimum value
+     * @param {number} max - Maximum value
+     * @returns {number} Random integer
+     */
+    static randomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Calculate the distance between two points
+     * @param {number} x1 - First point x
+     * @param {number} y1 - First point y
+     * @param {number} x2 - Second point x
+     * @param {number} y2 - Second point y
+     * @returns {number} Distance
+     */
+    static distance(x1, y1, x2, y2) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Calculate the squared distance between two points (faster than distance)
+     * @param {number} x1 - First point x
+     * @param {number} y1 - First point y
+     * @param {number} x2 - Second point x
+     * @param {number} y2 - Second point y
+     * @returns {number} Squared distance
+     */
+    static distanceSq(x1, y1, x2, y2) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Remap a value from one range to another
+     * @param {number} value - Value to remap
+     * @param {number} fromLow - Source range low
+     * @param {number} fromHigh - Source range high
+     * @param {number} toLow - Target range low
+     * @param {number} toHigh - Target range high
+     * @returns {number} Remapped value
+     */
+    static map(value, fromLow, fromHigh, toLow, toHigh) {
+         // Avoid division by zero
+         if (fromHigh === fromLow) {
+              return (toLow + toHigh) / 2; // Return midpoint of target range or specific value
+         }
+        const t = (value - fromLow) / (fromHigh - fromLow);
+        return toLow + (toHigh - toLow) * t;
+    }
+}
+
+/**
+ * Collision detection utilities (mostly unused if logic is within Ball/Container)
+ */
+class CollisionUtils {
+    /**
+     * Check if point is inside a rectangle
+     * @param {Object} point - Point {x, y}
+     * @param {Object} rect - Rectangle {x, y, width, height}
+     * @returns {boolean} True if point is inside rectangle
+     */
+    static pointInRect(point, rect) {
+        return point.x >= rect.x &&
+               point.x <= rect.x + rect.width &&
+               point.y >= rect.y &&
+               point.y <= rect.y + rect.height;
+    }
+
+    /**
+     * Check if point is inside a rotated rectangle (centered rectangle)
+     * @param {Object} point - Point {x, y} in world space
+     * @param {Object} rectCenter - Rectangle center {x, y}
+     * @param {number} rectWidth - Rectangle width
+     * @param {number} rectHeight - Rectangle height
+     * @param {number} angle - Rectangle rotation in radians
+     * @returns {boolean} True if point is inside rotated rectangle
+     */
+    static pointInRotatedRect(point, rectCenter, rectWidth, rectHeight, angle) {
+        // Translate point relative to rectangle center
+        const relX = point.x - rectCenter.x;
+        const relY = point.y - rectCenter.y;
+
+        // Rotate point backwards by rectangle angle
+        const cos = Math.cos(-angle);
+        const sin = Math.sin(-angle);
+        const rotatedX = relX * cos - relY * sin;
+        const rotatedY = relX * sin + relY * cos;
+
+        // Check if rotated point is within axis-aligned bounds
+        const halfWidth = rectWidth / 2;
+        const halfHeight = rectHeight / 2;
+        return Math.abs(rotatedX) <= halfWidth && Math.abs(rotatedY) <= halfHeight;
+    }
+
+    /**
+     * Check if circle intersects with rotated rectangle (centered rectangle)
+     * @param {Object} circle - Circle {x, y, radius}
+     * @param {Object} rectCenter - Rectangle center {x, y}
+     * @param {number} rectWidth - Rectangle width
+     * @param {number} rectHeight - Rectangle height
+     * @param {number} angle - Rectangle rotation in radians
+     * @returns {boolean} True if circle intersects rectangle
+     */
+    static circleIntersectsRotatedRect(circle, rectCenter, rectWidth, rectHeight, angle) {
+        // Translate circle position relative to rectangle center
+        const relX = circle.x - rectCenter.x;
+        const relY = circle.y - rectCenter.y;
+
+        // Rotate circle position backwards by rectangle angle
+        const cos = Math.cos(-angle);
+        const sin = Math.sin(-angle);
+        const rotatedX = relX * cos - relY * sin;
+        const rotatedY = relX * sin + relY * cos;
+
+        // Find the closest point on the rectangle (in its rotated frame) to the rotated circle center
+        const halfWidth = rectWidth / 2;
+        const halfHeight = rectHeight / 2;
+        const closestX = MathUtils.clamp(rotatedX, -halfWidth, halfWidth);
+        const closestY = MathUtils.clamp(rotatedY, -halfHeight, halfHeight);
+
+        // Calculate the squared distance between the rotated circle center and this closest point
+        const distanceSq = MathUtils.distanceSq(rotatedX, rotatedY, closestX, closestY);
+
+        // Check if the distance is less than the circle's radius squared
+        return distanceSq <= (circle.radius * circle.radius);
+    }
+
+    /**
+     * Check if two circles intersect
+     * @param {Object} c1 - First circle {x, y, radius}
+     * @param {Object} c2 - Second circle {x, y, radius}
+     * @returns {boolean} True if circles intersect
+     */
+    static circlesIntersect(c1, c2) {
+        const distanceSq = MathUtils.distanceSq(c1.x, c1.y, c2.x, c2.y);
+        const radiiSum = c1.radius + c2.radius;
+        return distanceSq < (radiiSum * radiiSum);
+    }
+
+    /**
+     * Calculate collision response for a ball hitting a static surface with a normal vector
+     * @param {Object} ball - Ball object {vx, vy}
+     * @param {Object} normal - Surface normal vector {x, y} (should be normalized)
+     * @param {number} bounce - Bounce coefficient (restitution)
+     * @returns {Object} New velocity {vx, vy}
+     */
+    static calculateBounce(ball, normal, bounce) {
+        // Ensure normal is a unit vector
+        const normalVec = new Vector2D(normal.x, normal.y).normalize();
+        const velocity = new Vector2D(ball.vx, ball.vy);
+
+        // Calculate velocity component along the normal: v_n = v · n
+        const velocityNormal = velocity.dot(normalVec);
+
+        // Calculate impulse magnitude: j = -(1 + bounce) * v_n
+        // Note: This assumes the surface has infinite mass.
+        const impulseMagnitude = -(1 + bounce) * velocityNormal;
+
+        // Calculate change in velocity: dv = j * n (assuming ball mass = 1, otherwise dv = j * n / mass)
+        const dv = normalVec.multiply(impulseMagnitude);
+
+        // Calculate new velocity: v' = v + dv
+        const newVelocity = velocity.add(dv);
+
+        return {
+            vx: newVelocity.x,
+            vy: newVelocity.y
+        };
+    }
+}
+
+/**
+ * Animation and timing utilities (Unused in current project)
+ */
+class AnimationUtils {
+    /**
+     * Create a simple easing function
+     * @param {string} type - Easing type: 'linear', 'easeIn', 'easeOut', 'easeInOut', 'easeInQuad', 'easeOutQuad', 'easeInOutQuad'
+     * @returns {Function} Easing function that takes t (0-1) and returns eased value
+     */
+    static easing(type = 'linear') {
+        switch (type) {
+            case 'linear':      return t => t;
+            case 'easeInQuad':  return t => t * t;
+            case 'easeOutQuad': return t => t * (2 - t);
+            case 'easeInOutQuad': return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            // Alias for simple quadratic easing
+            case 'easeIn':      return t => t * t;
+            case 'easeOut':     return t => t * (2 - t);
+            case 'easeInOut':   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            default:            return t => t;
+        }
+    }
+
+    /**
+     * Request animation frame with fallback
+     * @param {Function} callback - Animation callback function
+     * @returns {number} Request ID
+     */
+    static requestAnimFrame(callback) {
+        return (window.requestAnimationFrame ||
+               window.webkitRequestAnimationFrame ||
+               window.mozRequestAnimationFrame ||
+               (cb => window.setTimeout(cb, 1000 / 60)))(callback);
+    }
+
+    /**
+     * Cancel animation frame with fallback
+     * @param {number} id - Request ID to cancel
+     */
+    static cancelAnimFrame(id) {
+        (window.cancelAnimationFrame ||
+         window.webkitCancelAnimationFrame ||
+         window.mozCancelAnimationFrame ||
+         window.clearTimeout)(id);
+    }
+
+    /**
+     * Create a simple animation sequence (Example Usage)
+     * @param {number} duration - Animation duration in ms
+     * @param {Function} onUpdate - Update function(progress) called each frame (progress 0 to 1)
+     * @param {Function} [onComplete] - Optional completion callback
+     * @param {string} [easingType='linear'] - Type of easing function to apply
+     * @returns {Object} Animation controller with start, stop, pause, resume methods
+     */
+    static animate(duration, onUpdate, onComplete, easingType = 'linear') {
+        let startTime = null;
+        let animReq = null;
+        let paused = false;
+        let pauseStartTime = 0;
+        let accumulatedPauseTime = 0;
+
+        const easingFn = this.easing(easingType);
+
+        const step = (timestamp) => {
+            if (paused) {
+                 animReq = AnimationUtils.requestAnimFrame(step); // Keep requesting frame even when paused to handle resume
+                 return;
+            }
+            if (!startTime) {
+                 startTime = timestamp;
+            }
+
+            const elapsed = timestamp - startTime - accumulatedPauseTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easingFn(progress);
+
+            try {
+                 onUpdate(easedProgress);
+            } catch (error) {
+                 console.error("Error during animation update:", error);
+                 this.stop(); // Stop animation on error
+                 return;
+            }
+
+
+            if (progress < 1) {
+                animReq = AnimationUtils.requestAnimFrame(step);
+            } else {
+                startTime = null; // Reset for potential restart
+                accumulatedPauseTime = 0;
+                if (onComplete) {
+                     try { onComplete(); } catch (error) { console.error("Error during animation completion:", error); }
+                }
+            }
+        };
+
+        const controller = {
+            start() {
+                if (animReq) { // Prevent multiple starts
+                     this.stop();
+                }
+                paused = false;
+                startTime = null; // Reset start time
+                accumulatedPauseTime = 0;
+                animReq = AnimationUtils.requestAnimFrame(step);
+                return this;
+            },
+
+            pause() {
+                if (!paused && animReq) {
+                    paused = true;
+                    pauseStartTime = performance.now(); // Record when pause started
+                    AnimationUtils.cancelAnimFrame(animReq); // Stop requesting new frames
+                    animReq = null; // Clear request ID
+                }
+                return this;
+            },
+
+            resume() {
+                if (paused) {
+                    paused = false;
+                    // Add the duration of the pause to the accumulated pause time
+                    accumulatedPauseTime += performance.now() - pauseStartTime;
+                    animReq = AnimationUtils.requestAnimFrame(step); // Restart the animation loop
+                }
+                return this;
+            },
+
+            stop() {
+                 if (animReq) {
+                      AnimationUtils.cancelAnimFrame(animReq);
+                 }
+                 animReq = null;
+                 paused = false;
+                 startTime = null;
+                 accumulatedPauseTime = 0;
+                 pauseStartTime = 0;
+                 return this;
+            },
+
+            isRunning: () => !!animReq && !paused,
+            isPaused: () => paused,
+        };
+        return controller;
+    }
+}
+
+/**
+ * DOM manipulation utilities (Unused in current project)
+ */
+class DOMUtils {
+    /**
+     * Create a DOM element with attributes and children
+     * @param {string} tag - HTML tag name
+     * @param {Object} [attrs={}] - Attributes to set on element (e.g., { id: 'myId', class: 'myClass', style: { color: 'red' }, 'data-value': 5 })
+     * @param {Array|Node|string} [children=[]] - Child elements or text nodes to append
+     * @returns {HTMLElement} Created element
+     */
+    static createElement(tag, attrs = {}, children = []) {
+        const element = document.createElement(tag);
+
+        // Set attributes
+        for (const key in attrs) {
+            if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+                const value = attrs[key];
+                if (key === 'style' && typeof value === 'object') {
+                    Object.assign(element.style, value);
+                } else if (key === 'class' || key === 'className') {
+                    if (Array.isArray(value)) {
+                         element.className = value.join(' ');
+                    } else if (typeof value === 'string') {
+                         element.className = value;
+                    }
+                } else if (key.startsWith('on') && typeof value === 'function') {
+                    element.addEventListener(key.slice(2).toLowerCase(), value);
+                } else if (typeof value === 'boolean') {
+                     if (value) {
+                          element.setAttribute(key, ''); // Set boolean attributes like 'disabled'
+                     }
+                } else if (value != null) { // Set other attributes if value is not null/undefined
+                    element.setAttribute(key, value);
+                }
+            }
+        }
+
+
+        // Add children
+        const addChild = (child) => {
+            if (child instanceof Node) {
+                element.appendChild(child);
+            } else if (child != null) { // Append non-null/undefined values as text nodes
+                element.appendChild(document.createTextNode(String(child)));
+            }
+        };
+
+        if (Array.isArray(children)) {
+            children.forEach(addChild);
+        } else {
+            addChild(children); // Handle single child (Node or string)
+        }
+
+        return element;
+    }
+
+    /**
+     * Add multiple event listeners to an element
+     * @param {EventTarget} element - Element to add listeners to
+     * @param {Object.<string, Function>} events - Object with event names as keys and handlers as values
+     * @param {boolean|Object} [options] - Optional capture/passive options
+     */
+    static addEventListeners(element, events, options) {
+        if (!element || !events) return;
+        Object.entries(events).forEach(([event, handler]) => {
+             if (typeof handler === 'function') {
+                  element.addEventListener(event, handler, options);
+             }
+        });
+    }
+
+    /**
+     * Remove multiple event listeners from an element
+     * @param {EventTarget} element - Element to remove listeners from
+     * @param {Object.<string, Function>} events - Object with event names as keys and handlers as values
+     * @param {boolean|Object} [options] - Optional capture options (must match options used in addEventListener)
+     */
+    static removeEventListeners(element, events, options) {
+         if (!element || !events) return;
+        Object.entries(events).forEach(([event, handler]) => {
+             if (typeof handler === 'function') {
+                  element.removeEventListener(event, handler, options);
+             }
+        });
+    }
+}
+
+// Export the utilities by attaching them to the window object for script tag usage
+window.Vector2D = Vector2D;
+window.RotationUtils = RotationUtils;
+window.ColorUtils = ColorUtils;
+window.MathUtils = MathUtils;
+window.CollisionUtils = CollisionUtils;
+window.AnimationUtils = AnimationUtils;
+window.DOMUtils = DOMUtils;
+--- FIX_END ---

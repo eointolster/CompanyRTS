@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Agent Simulation</title>
+    <link id="theme-style" rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Company RTS</h1>
+
+    <div id="container-main">
+        <div id="main-area">
+            <div id="agents-on-ground"></div>
+            <div id="markers-on-ground"></div>
+            <div class="ground"></div>
+        </div>
+
+        <div id="panel">
+            <button id="toggle-panel-btn" title="Toggle Panel">«</button>
+            <h3>Controls</h3>
+            <div id="grid" class="grid">
+                </div>
+            <button id="add-block-btn">Add Block</button>
+            <button id="save-blocks-btn">Save All Blocks</button>
+
+            <div style="margin-top:15px;">
+                <button id="spawn-agent-open-modal-btn">Spawn Agent</button>
+            </div>
+
+            <div style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">
+                <button id="theme-switcher-btn">Switch Theme</button>
+                <span id="current-theme-name" style="margin-left: 10px; font-size: 0.9em; opacity: 0.7;"></span>
+            </div>
+            <div id="log">
+                </div>
+        </div>
+    </div>
+
+    <div id="modal-bg" class="modal-bg" style="display:none;">
+        <div class="modal-box">
+            <h3 id="modal-header">Block Details</h3>
+            <p>
+                <label for="modal-title">Title:</label><br>
+                <input type="text" id="modal-title" style="width:90%;">
+            </p>
+            <p>
+                <label for="modal-desc">Description:</label><br>
+                <textarea id="modal-desc" style="width:90%; height:60px;"></textarea>
+            </p>
+            <p>
+                <button id="modal-save-button">Save</button>
+                <button id="modal-cancel-button">Cancel</button>
+            </p>
+        </div>
+    </div>
+
+    <div id="spawn-agent-modal-bg" class="modal-bg" style="display:none;">
+        <div class="modal-box">
+            <h3>Configure Agent</h3>
+            <p>
+                <label for="llm-provider-select">LLM Provider:</label><br>
+                <select id="llm-provider-select" style="width:95%;">
+                    <option value="">-- Select Provider --</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic</option>
+                </select>
+            </p>
+            <p>
+                <label for="llm-model-input">Model Name (Optional):</label><br>
+                <input type="text" id="llm-model-input" style="width:90%;" placeholder="e.g., gpt-4o, gemini-1.5-flash, claude-3-haiku-...">
+            </p>
+            <p style="margin-top: 10px;">
+                <input type="checkbox" id="spawn-agent-qa-checkbox" name="is_qa_agent">
+                <label for="spawn-agent-qa-checkbox" style="display: inline; font-weight: normal;">Spawn as QA Agent (Blue)</label>
+            </p>
+            <p>
+                <button id="spawn-modal-spawn-button">Spawn Agent</button>
+                <button id="spawn-modal-cancel-button">Cancel</button>
+            </p>
+        </div>
+    </div>
+
+    <script src="/static/ui.js"></script>
+    <script type="module" src="/static/utils.js"></script>
+    <script type="module" src="/static/agents.js"></script>
+    <script type="module" src="/static/app.js"></script>
+
+</body>
+</html>

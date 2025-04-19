@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotating Square with Gravity Balls</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #121212;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        canvas {
+            background-color: #000;
+            border: 1px solid #333;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 800px;
+        }
+        
+        .control-group {
+            background-color: #222;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        
+        label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+        
+        input[type="range"] {
+            width: 120px;
+        }
+        
+        input[type="number"] {
+            width: 50px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 3px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        input[type="color"] {
+            background: none;
+            border: none;
+            width: 25px;
+            height: 25px;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <div class="control-group">
+            <h3>Square</h3>
+            <label>
+                Rotation Speed:
+                <input type="range" id="rotationSpeed" min="0" max="10" step="0.1" value="1">
+            </label>
+            <div class="color-picker">
+                <span>Border Color:</span>
+                <input type="color" id="squareColor" value="#4CAF50">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Balls</h3>
+            <label>
+                Number of Balls:
+                <input type="number" id="ballCount" min="1" max="100" value="20">
+            </label>
+            <label>
+                Min Size:
+                <input type="number" id="minSize" min="5" max="50" value="10">
+            </label>
+            <label>
+                Max Size:
+                <input type="number" id="maxSize" min="10" max="100" value="30">
+            </label>
+            <button id="resetBalls">Reset Balls</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>Physics</h3>
+            <label>
+                Gravity:
+                <input type="range" id="gravity" min="0" max="1" step="0.01" value="0.2">
+            </label>
+            <label>
+                Bounce:
+                <input type="range" id="bounce" min="0" max="1" step="0.01" value="0.7">
+            </label>
+            <label>
+                Friction:
+                <input type="range" id="friction" min="0" max="1" step="0.01" value="0.99">
+            </label>
+        </div>
+    </div>
+    
+    <script src="utils.js"></script>
+    <script src="physics.js"></script>
+    <script src="ball.js"></script>
+    <script src="renderer.js"></script>
+    <script src="container.js"></script>
+    <script src="input.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

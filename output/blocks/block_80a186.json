@@ -1,0 +1,5 @@
+{
+  "title": "Parallax Scrolling Effect",
+  "description": "Create a single, long HTML page with 3 distinct sections, each having a full-viewport background image (use placeholder image URLs or simple CSS gradients). Implement a parallax scrolling effect using CSS background properties (background-attachment: fixed;) or basic JavaScript to move background images at a different rate than the foreground content as the user scrolls down the page.",
+  "block_id": "block_80a186"
+}
